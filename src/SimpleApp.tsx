@@ -1270,12 +1270,47 @@ function SimpleApp() {
         </div> {/* Close station cards container */}
       </div>
 
+      {/* Strava Link */}
+      <div style={{ 
+        textAlign: 'center', 
+        marginTop: '0.5rem',
+        marginBottom: '0.5rem',
+        padding: '0 1rem' // Same horizontal padding as the main content
+      }}>
+        <a 
+          href="https://www.strava.com/routes/3403462875498749806"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            color: '#FC4C02', // Strava orange
+            textDecoration: 'none',
+            fontSize: '0.875rem',
+            fontWeight: 'bold',
+            border: '2px solid #FC4C02',
+            padding: '0.5rem 1rem',
+            borderRadius: '4px',
+            display: 'inline-block',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={(e) => {
+            (e.target as HTMLElement).style.backgroundColor = '#FC4C02';
+            (e.target as HTMLElement).style.color = '#231F20';
+          }}
+          onMouseLeave={(e) => {
+            (e.target as HTMLElement).style.backgroundColor = 'transparent';
+            (e.target as HTMLElement).style.color = '#FC4C02';
+          }}
+        >
+          Click here to view the full route on Strava
+        </a>
+      </div>
+
       {/* Footer */}
       <div style={{ 
         textAlign: 'center', 
         color: '#7195CD', // Danube for footer
         fontSize: '0.75rem',
-        marginTop: '2rem'
+        marginTop: '0.75rem'
       }}>
         Last updated: {new Date(event.updatedAt).toLocaleString()}
       </div>
