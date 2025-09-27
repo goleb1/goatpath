@@ -38,72 +38,72 @@ const leTour2025: Event = {
   stops: [
     {
       id: 'stop1',
-      name: 'The Starting Gate',
-      address: '123 Start Street, Nashville, TN',
+      name: 'Grimm Central',
+      address: '704 Crystal Drive',
       position: 0,
-      distanceToNext: '1.5 miles',
+      distanceToNext: '1.9 miles',
       status: 'pending'
     },
     {
       id: 'stop2',
-      name: 'Hillbilly Haven',
-      address: '456 Haven Lane, Nashville, TN',
+      name: 'McGee Metro',
+      address: '64 Woodhaven Drive',
       position: 1,
-      distanceToNext: '1.2 miles',
+      distanceToNext: '1.0 miles',
       status: 'pending'
     },
     {
       id: 'stop3',
-      name: 'The Watering Hole',
-      address: '789 Water Way, Nashville, TN',
+      name: 'Brasacchio Boulevard',
+      address: '217 Vernon Drive',
       position: 2,
-      distanceToNext: '1.8 miles',
-      status: 'pending'
-    },
-    {
-      id: 'stop4',
-      name: 'Mountain View Manor',
-      address: '321 Mountain Road, Nashville, TN',
-      position: 3,
-      distanceToNext: '1.3 miles',
-      status: 'pending'
-    },
-    {
-      id: 'stop5',
-      name: 'Country Corner',
-      address: '654 Country Lane, Nashville, TN',
-      position: 4,
-      distanceToNext: '1.7 miles',
-      status: 'pending'
-    },
-    {
-      id: 'stop6',
-      name: 'Bourbon Barn',
-      address: '987 Bourbon Blvd, Nashville, TN',
-      position: 5,
-      distanceToNext: '1.4 miles',
-      status: 'pending'
-    },
-    {
-      id: 'stop7',
-      name: 'The Final Frontier',
-      address: '147 Frontier Ave, Nashville, TN',
-      position: 6,
       distanceToNext: '1.6 miles',
       status: 'pending'
     },
     {
-      id: 'stop8',
-      name: 'Victory Villa',
-      address: '258 Victory Street, Nashville, TN',
-      position: 7,
+      id: 'stop4',
+      name: 'Styler Station',
+      address: '631 Osage Road',
+      position: 3,
+      distanceToNext: '0.9 miles',
+      status: 'pending'
+    },
+    {
+      id: 'stop5',
+      name: 'Holliday Heights',
+      address: '1641 Williamsburg Road',
+      position: 4,
+      distanceToNext: '2.9 miles',
+      status: 'pending'
+    },
+    {
+      id: 'stop6',
+      name: 'Albert Avenue',
+      address: '2856 Broadway Avenue',
+      position: 5,
       distanceToNext: '1.5 miles',
       status: 'pending'
     },
     {
+      id: 'stop7',
+      name: 'Baird Terminal',
+      address: '1636 Bellaire Place',
+      position: 6,
+      distanceToNext: '1.2 miles',
+      status: 'pending'
+    },
+    {
+      id: 'stop8',
+      name: 'Golebie Grand',
+      address: '954 Norwich Avenue',
+      position: 7,
+      distanceToNext: '2.1 miles',
+      status: 'pending'
+    },
+    {
       id: 'stop9',
-      name: 'The Grand Finale',
-      address: '369 Finale Road, Nashville, TN',
+      name: 'Baldasare Union',
+      address: '325 Tampa Avenue',
       position: 8,
       status: 'pending'
     }
@@ -746,7 +746,8 @@ function SimpleApp() {
               
               <button
                 onClick={() => {
-                  const encodedAddress = encodeURIComponent(actionableStop.address);
+                  const fullAddress = `${actionableStop.address}, Pittsburgh, PA`;
+                  const encodedAddress = encodeURIComponent(fullAddress);
                   window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
                 }}
                 style={{
@@ -761,7 +762,7 @@ function SimpleApp() {
                   display: 'block'
                 }}
               >
-                📍 {actionableStop.address}
+                {actionableStop.address}
               </button>
               
               <div style={{ 
@@ -1088,7 +1089,8 @@ function SimpleApp() {
               </h3>
               <button
                 onClick={() => {
-                  const encodedAddress = encodeURIComponent(stop.address);
+                  const fullAddress = `${stop.address}, Pittsburgh, PA`;
+                  const encodedAddress = encodeURIComponent(fullAddress);
                   window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
                 }}
                 style={{
@@ -1103,7 +1105,7 @@ function SimpleApp() {
                   display: 'block'
                 }}
               >
-                📍 {stop.address}
+                {stop.address}
               </button>
               <div style={{ 
                 display: 'flex', 

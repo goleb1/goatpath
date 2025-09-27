@@ -78,7 +78,7 @@ export function SimpleEventDisplay() {
             color: '#ffbf00', 
             marginBottom: '1rem' 
           }}>
-            📍 CURRENT LOCATION
+            CURRENT LOCATION
           </h2>
           <div style={{ 
             backgroundColor: '#1a1a1a', 
@@ -96,7 +96,8 @@ export function SimpleEventDisplay() {
             </h3>
             <button
               onClick={() => {
-                const encodedAddress = encodeURIComponent(currentStop.address);
+                const fullAddress = `${currentStop.address}, Pittsburgh, PA`;
+                const encodedAddress = encodeURIComponent(fullAddress);
                 window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
               }}
               style={{
@@ -109,7 +110,7 @@ export function SimpleEventDisplay() {
                 fontFamily: 'inherit'
               }}
             >
-              📍 {currentStop.address}
+              {currentStop.address}
             </button>
             <div style={{ 
               display: 'flex', 
@@ -182,7 +183,8 @@ export function SimpleEventDisplay() {
             </h3>
             <button
               onClick={() => {
-                const encodedAddress = encodeURIComponent(stop.address);
+                const fullAddress = `${stop.address}, Pittsburgh, PA`;
+                const encodedAddress = encodeURIComponent(fullAddress);
                 window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
               }}
               style={{
@@ -197,7 +199,7 @@ export function SimpleEventDisplay() {
                 display: 'block'
               }}
             >
-              📍 {stop.address}
+              {stop.address}
             </button>
             <div style={{ 
               display: 'flex', 

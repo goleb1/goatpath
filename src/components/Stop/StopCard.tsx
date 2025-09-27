@@ -47,7 +47,8 @@ export function StopCard({ stop, isActive, showTimer = true }: StopCardProps) {
   };
 
   const handleLocationClick = () => {
-    const encodedAddress = encodeURIComponent(stop.address);
+    const fullAddress = `${stop.address}, Pittsburgh, PA`;
+    const encodedAddress = encodeURIComponent(fullAddress);
     window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
   };
 
@@ -74,7 +75,7 @@ export function StopCard({ stop, isActive, showTimer = true }: StopCardProps) {
         onClick={handleLocationClick}
         className="text-retro-amber hover:text-retro-green transition-colors text-left font-mono text-sm mb-3 underline"
       >
-        📍 {stop.address}
+        {stop.address}
       </button>
 
       {/* Status and Distance */}

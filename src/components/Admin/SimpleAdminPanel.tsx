@@ -107,13 +107,27 @@ export function SimpleAdminPanel() {
             }}>
               {currentStop.name.toUpperCase()}
             </h3>
-            <div style={{ 
-              color: '#ffbf00', 
-              fontSize: '0.875rem',
-              marginBottom: '0.75rem'
-            }}>
-              📍 {currentStop.address}
-            </div>
+            <button
+              onClick={() => {
+                const fullAddress = `${currentStop.address}, Pittsburgh, PA`;
+                const encodedAddress = encodeURIComponent(fullAddress);
+                window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+              }}
+              style={{
+                color: '#ffbf00',
+                backgroundColor: 'transparent',
+                border: 'none',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontFamily: 'inherit',
+                marginBottom: '0.75rem',
+                display: 'block',
+                textAlign: 'left'
+              }}
+            >
+              {currentStop.address}
+            </button>
             <div style={{ 
               fontSize: '0.875rem', 
               fontWeight: 'bold',
@@ -194,13 +208,27 @@ export function SimpleAdminPanel() {
             }}>
               {nextStop.name.toUpperCase()}
             </h3>
-            <div style={{ 
-              color: '#ffbf00', 
-              fontSize: '0.875rem',
-              marginBottom: '0.75rem'
-            }}>
-              📍 {nextStop.address}
-            </div>
+            <button
+              onClick={() => {
+                const fullAddress = `${nextStop.address}, Pittsburgh, PA`;
+                const encodedAddress = encodeURIComponent(fullAddress);
+                window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+              }}
+              style={{
+                color: '#ffbf00',
+                backgroundColor: 'transparent',
+                border: 'none',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontFamily: 'inherit',
+                marginBottom: '0.75rem',
+                display: 'block',
+                textAlign: 'left'
+              }}
+            >
+              {nextStop.address}
+            </button>
           </div>
         </div>
       )}

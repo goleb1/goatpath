@@ -45,7 +45,7 @@ export function EventDisplay() {
       {currentStop && (
         <div className="mb-6">
           <h2 className="text-lg font-bold text-retro-amber mb-4 font-mono">
-            📍 CURRENT LOCATION
+            CURRENT LOCATION
           </h2>
           <StopCard 
             stop={currentStop} 
