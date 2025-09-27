@@ -1,5 +1,5 @@
-import React from 'react';
-import { EventProvider, useEvent } from './context/EventContext';
+import { EventProvider } from './context/EventContext';
+import { useEvent } from './context/useEventExport';
 import { SimplePasswordPrompt } from './components/Auth/SimplePasswordPrompt';
 import { SimpleEventDisplay } from './components/Event/SimpleEventDisplay';
 import { SimpleAdminPanel } from './components/Admin/SimpleAdminPanel';

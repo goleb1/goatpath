@@ -1,12 +1,3 @@
-export interface CustomBranding {
-  colors?: {
-    primary?: string;
-    secondary?: string;
-    background?: string;
-  };
-  logo?: string;
-}
-
 export interface Stop {
   id: string;
   name: string;
@@ -23,7 +14,6 @@ export interface EventSettings {
   theme: 'retro' | 'modern' | 'custom';
   timerThresholds: { yellow: number; red: number };
   showBeerAnimation: boolean;
-  customBranding?: CustomBranding;
 }
 
 export interface Event {

@@ -1,5 +1,4 @@
-import React from 'react';
-import { useEvent } from '../../context/EventContext';
+import { useEvent } from '../../context/useEventExport';
 import { StopCard } from '../Stop/StopCard';
 
 export function AdminPanel() {

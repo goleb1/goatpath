@@ -1,4 +1,4 @@
-import type { Event } from '../context/EventContext';
+import type { Event } from '../types/Event';
 
 export const leTour2025: Event = {
   id: 'letour2025',

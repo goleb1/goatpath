@@ -1,5 +1,4 @@
-import React from 'react';
-import { Stop } from '../../types/Event';
+import type { Stop } from '../../types/Event';
 
 interface BeerGlassProps {
   stop: Stop;

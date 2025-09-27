@@ -1,4 +1,4 @@
-import { useEvent } from '../../context/EventContext';
+import { useEvent } from '../../context/useEventExport';
 import { MarqueeSign } from '../MarqueeSign/MarqueeSign';
 
 export function SimpleEventDisplay() {

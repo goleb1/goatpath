@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useEvent } from '../../context/EventContext';
+import { useEvent } from '../../context/useEventExport';
 import { leTour2025 } from '../../data/letour2025';
 
 export function PasswordPrompt() {

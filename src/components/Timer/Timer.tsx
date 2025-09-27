@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Stop } from '../../types/Event';
+import { useState, useEffect } from 'react';
+import type { Stop } from '../../types/Event';
 
 interface TimerProps {
   stop: Stop;
