@@ -939,42 +939,22 @@ function SimpleApp() {
           justifyContent: 'space-between',
           gap: '1rem'
         }}>
-          {/* Logo */}
+          {/* SHBAC Express Logo */}
           <div style={{ 
             display: 'flex', 
-            alignItems: 'center', 
-            minWidth: 'fit-content',
-            padding: '0.75rem',
-            marginLeft: '-0.75rem' // Offset the padding to align with edge
+            alignItems: 'left', 
+            flex: 1,
+            justifyContent: 'left'
           }}>
             <img 
-              src="/src/assets/SHB_logo.png" 
-              alt="South Hillbillies Logo" 
+              src="/src/assets/SHBACExpress.png" 
+              alt="SHBAC Express" 
               style={{ 
-                height: '48px', 
+                height: '70px', 
                 width: 'auto',
                 objectFit: 'contain'
               }}
             />
-          </div>
-          
-          <div style={{ flex: 1, marginLeft: '1rem' }}>
-            <h1 style={{ 
-              fontSize: '1.125rem', 
-              fontWeight: 'bold', 
-              color: '#EBE4C1', // Fall Green
-              margin: 0,
-              lineHeight: 1.2
-            }}>
-              {event.title.toUpperCase()}
-            </h1>
-            <div style={{ 
-              color: '#B1CDFF', 
-              fontSize: '0.75rem',
-              marginTop: '0.125rem'
-            }}>
-              LIVE TRACKING
-            </div>
           </div>
           
           {/* Beer Mug Progress */}
@@ -1005,16 +985,16 @@ function SimpleApp() {
             {/* Beer Mug */}
             <div style={{ 
               position: 'relative',
-              width: '32px',
-              height: '48px',
+              width: '45px',
+              height: '65px',
               marginRight: '0.5rem'
             }}>
               {/* Mug outline */}
               <div style={{
                 position: 'absolute',
-                width: '26px',
-                height: '42px',
-                border: '2px solid #B1CDFF',
+                width: '36px',
+                height: '58px',
+                border: '3px solid #B1CDFF',
                 borderRadius: '0 0 10px 10px',
                 backgroundColor: 'transparent'
               }}>
@@ -1026,19 +1006,19 @@ function SimpleApp() {
                   width: '100%',
                   height: `${100 - progressPercentage}%`,
                   backgroundColor: '#FFBF00', // Beer color
-                  borderRadius: progressPercentage > 80 ? '0' : '0 0 8px 8px',
+                  borderRadius: progressPercentage > 80 ? '0' : '0 0 6px 6px',
                   transition: 'height 0.5s ease'
                 }}>
                   {/* Foam layer */}
                   {progressPercentage < 100 && (
                     <div style={{
                       position: 'absolute',
-                      top: '-3px',
+                      top: '-4px',
                       left: 0,
                       width: '100%',
                       height: '6px',
                       backgroundColor: '#FFF8DC',
-                      borderRadius: '3px'
+                      borderRadius: '2px'
                     }}></div>
                   )}
                 </div>
@@ -1047,11 +1027,11 @@ function SimpleApp() {
               {/* Mug handle */}
               <div style={{
                 position: 'absolute',
-                right: '-8px',
-                top: '8px',
-                width: '10px',
-                height: '16px',
-                border: '2px solid #B1CDFF',
+                right: '-4px',
+                top: '11px',
+                width: '16px',
+                height: '30px',
+                border: '3px solid #B1CDFF',
                 borderLeft: 'none',
                 borderRadius: '0 6px 6px 0'
               }}></div>
@@ -1063,7 +1043,7 @@ function SimpleApp() {
       {/* Marquee Sign - Fixed position just below header */}
       <div style={{
         position: 'fixed',
-        top: '97px', // Position just below the sticky header
+        top: '95px', // Position just below the sticky header
         left: '0',
         right: '0',
         width: '100vw',
