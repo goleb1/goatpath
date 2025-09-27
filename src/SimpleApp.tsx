@@ -318,18 +318,15 @@ function RouteCardTimer({ event, stop, index }: { event: Event; stop: Stop; inde
                       event.stops[index - 1].status === 'completed';
   
   let showTimer = false;
-  let timerText = '';
   let startTime: Date | null = null;
   
   if (isActive && stop.arrivalTime) {
     showTimer = true;
-    timerText = 'AT STOP';
     startTime = new Date(stop.arrivalTime);
   } else if (isRunningTo) {
     const previousStop = event.stops[index - 1];
     if (previousStop && previousStop.status === 'completed' && previousStop.departureTime) {
       showTimer = true;
-      timerText = 'RUNNING TO';
       startTime = new Date(previousStop.departureTime);
     }
   }
@@ -432,7 +429,6 @@ function SimpleApp() {
 
     const pollForUpdates = () => {
       const savedEvent = localStorage.getItem(STORAGE_KEYS.EVENT);
-      const lastUpdate = localStorage.getItem(STORAGE_KEYS.LAST_UPDATE);
       
       if (savedEvent) {
         try {
@@ -526,11 +522,6 @@ function SimpleApp() {
     });
   };
 
-  // This function is no longer needed since currentStopIndex is updated in updateStopStatus
-  // Keeping it for backward compatibility but it won't be used
-  const advanceToNextStop = () => {
-    // No longer used - currentStopIndex is updated when arriving at stops
-  };
 
   const resetEvent = () => {
     if (window.confirm('Reset entire event? This will clear all progress.')) {
@@ -643,7 +634,6 @@ function SimpleApp() {
   if (!event) return null;
 
   const currentStop = event.stops[event.currentStopIndex];
-  const nextStop = event.stops[event.currentStopIndex + 1];
   const progressPercentage = Math.round(
     (event.stops.filter(s => s.status === 'completed').length / event.stops.length) * 100
   );
