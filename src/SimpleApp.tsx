@@ -1183,30 +1183,40 @@ function SimpleApp() {
                 transition: 'all 0.3s ease'
               }}
             >
-              {/* Status in top right corner */}
-              <div style={{
-                position: 'absolute',
-                top: '0.75rem',
-                right: '0.75rem',
-                fontSize: '0.8rem', 
-                fontWeight: 'bold',
-                color: isCompleted ? '#7195CD' : // Dimmed Danube for completed
-                       isActive ? '#B1CDFF' : '#B1CDFF' // Melrose for active and pending (light yellow)
-              }}>
-                {stop.status === 'pending' ? 'NOT STARTED' : 
-                 stop.status === 'active' ? 'IN PROGRESS' : 'COMPLETED'}
-              </div>
-              
-              {/* Timer in top right corner, below status */}
-              <div style={{
-                position: 'absolute',
-                top: '2.25rem', // Position below the status text
-                right: '0.75rem',
-                display: 'flex',
-                justifyContent: 'flex-end'
-              }}>
-                <RouteCardTimer event={event} stop={stop} index={index} />
-              </div>
+              {/* Status or Timer in top right corner */}
+              {stop.status === 'completed' ? (
+                <div style={{
+                  position: 'absolute',
+                  top: '0.75rem',
+                  right: '0.75rem',
+                  fontSize: '0.8rem', 
+                  fontWeight: 'bold',
+                  color: '#7195CD' // Dimmed Danube for completed
+                }}>
+                  COMPLETED
+                </div>
+              ) : stop.status === 'pending' && !isRunningTo ? (
+                <div style={{
+                  position: 'absolute',
+                  top: '0.75rem',
+                  right: '0.75rem',
+                  fontSize: '0.8rem', 
+                  fontWeight: 'bold',
+                  color: '#B1CDFF' // Melrose for upcoming
+                }}>
+                  UPCOMING
+                </div>
+              ) : (
+                <div style={{
+                  position: 'absolute',
+                  top: '0.75rem',
+                  right: '0.75rem',
+                  display: 'flex',
+                  justifyContent: 'flex-end'
+                }}>
+                  <RouteCardTimer event={event} stop={stop} index={index} />
+                </div>
+              )}
               
               <div style={{ 
                 display: 'flex', 
@@ -1264,16 +1274,35 @@ function SimpleApp() {
                 >
                   {stop.address}
                 </button>
-                {stop.distanceToNext && (
-                  <div style={{ 
-                    color: isCompleted ? '#7195CD80' : '#7195CD', // Dimmed for completed
-                    fontSize: '0.8rem',
-                    textAlign: 'right',
-                    marginLeft: '0.5rem'
-                  }}>
-                    Next: {stop.distanceToNext.replace('miles', 'mi')}
-                  </div>
-                )}
+                {(() => {
+                  // Determine what distance to show and how to label it
+                  let distanceText = '';
+                  let label = '';
+                  
+                  if (isRunningTo) {
+                    // When running to a stop, show the distance from the previous stop
+                    const previousStop = event.stops[index - 1];
+                    if (previousStop && previousStop.distanceToNext) {
+                      distanceText = previousStop.distanceToNext.replace('miles', 'mi');
+                      label = 'Now: ';
+                    }
+                  } else if (stop.distanceToNext) {
+                    // When at a stop, show the distance to the next stop
+                    distanceText = stop.distanceToNext.replace('miles', 'mi');
+                    label = 'Next: ';
+                  }
+                  
+                  return distanceText ? (
+                    <div style={{ 
+                      color: isCompleted ? '#7195CD80' : '#7195CD', // Dimmed for completed
+                      fontSize: '0.8rem',
+                      textAlign: 'right',
+                      marginLeft: '0.5rem'
+                    }}>
+                      {label}{distanceText}
+                    </div>
+                  ) : null;
+                })()}
               </div>
             </div>
           );
