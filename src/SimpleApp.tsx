@@ -363,9 +363,6 @@ function RouteCardTimer({ event, stop, index }: { event: Event; stop: Stop; inde
 
   return (
     <div style={{ 
-      position: 'absolute',
-      top: '0.5rem',
-      right: '0.5rem',
       padding: '0.5rem 0.75rem',
       backgroundColor: '#231F20',
       border: '1px solid #B1CDFF',
@@ -1186,8 +1183,30 @@ function SimpleApp() {
                 transition: 'all 0.3s ease'
               }}
             >
-              {/* Timer in top right corner */}
-              <RouteCardTimer event={event} stop={stop} index={index} />
+              {/* Status in top right corner */}
+              <div style={{
+                position: 'absolute',
+                top: '0.75rem',
+                right: '0.75rem',
+                fontSize: '0.8rem', 
+                fontWeight: 'bold',
+                color: isCompleted ? '#7195CD' : // Dimmed Danube for completed
+                       isActive ? '#B1CDFF' : '#B1CDFF' // Melrose for active and pending (light yellow)
+              }}>
+                {stop.status === 'pending' ? 'NOT STARTED' : 
+                 stop.status === 'active' ? 'IN PROGRESS' : 'COMPLETED'}
+              </div>
+              
+              {/* Timer in top right corner, below status */}
+              <div style={{
+                position: 'absolute',
+                top: '2.25rem', // Position below the status text
+                right: '0.75rem',
+                display: 'flex',
+                justifyContent: 'flex-end'
+              }}>
+                <RouteCardTimer event={event} stop={stop} index={index} />
+              </div>
               
               <div style={{ 
                 display: 'flex', 
@@ -1218,47 +1237,41 @@ function SimpleApp() {
                 {stop.name.toUpperCase()}
                 {isCompleted && ' ✓'}
               </h3>
-              <button
-                onClick={() => {
-                  const fullAddress = `${stop.address}, Pittsburgh, PA`;
-                  const encodedAddress = encodeURIComponent(fullAddress);
-                  window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
-                }}
-                style={{
-                  color: isCompleted ? '#A0937680' : '#A09376', // Dimmed for completed
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  textDecoration: 'underline',
-                  cursor: 'pointer',
-                  fontSize: '0.8rem',
-                  fontFamily: 'inherit',
-                  marginBottom: '0.5rem',
-                  display: 'block'
-                }}
-              >
-                {stop.address}
-              </button>
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                marginTop: '0.25rem'
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                marginBottom: '0.5rem'
               }}>
-                <div style={{ 
-                  fontSize: '0.8rem', 
-                  fontWeight: 'bold',
-                  color: isCompleted ? '#7195CD' : // Dimmed Danube for completed
-                         isActive ? '#B1CDFF' : '#B1CDFF' // Melrose for active and pending (light yellow)
-                }}>
-                  {stop.status === 'pending' ? 'NOT STARTED' : 
-                   stop.status === 'active' ? 'IN PROGRESS' : 'COMPLETED'}
-                </div>
+                <button
+                  onClick={() => {
+                    const fullAddress = `${stop.address}, Pittsburgh, PA`;
+                    const encodedAddress = encodeURIComponent(fullAddress);
+                    window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+                  }}
+                  style={{
+                    color: isCompleted ? '#A0937680' : '#A09376', // Dimmed for completed
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                    fontSize: '0.8rem',
+                    fontFamily: 'inherit',
+                    display: 'block',
+                    flex: 1,
+                    textAlign: 'left'
+                  }}
+                >
+                  {stop.address}
+                </button>
                 {stop.distanceToNext && (
                   <div style={{ 
                     color: isCompleted ? '#7195CD80' : '#7195CD', // Dimmed for completed
-                    fontSize: '0.8rem' 
+                    fontSize: '0.8rem',
+                    textAlign: 'right',
+                    marginLeft: '0.5rem'
                   }}>
-                    Next: {stop.distanceToNext}
+                    Next: {stop.distanceToNext.replace('miles', 'mi')}
                   </div>
                 )}
               </div>

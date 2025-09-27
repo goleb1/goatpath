@@ -61,7 +61,12 @@ export function StopCard({ stop, isActive, showTimer = true }: StopCardProps) {
           </div>
           <BeerGlass stop={stop} />
         </div>
-        {showTimer && <Timer stop={stop} isActive={isActive} />}
+        <div className="flex flex-col items-end">
+          <div className={`font-mono text-sm font-bold ${getStatusColor()} mb-1`}>
+            {getStatusDisplay()}
+          </div>
+          {showTimer && <Timer stop={stop} isActive={isActive} />}
+        </div>
       </div>
 
       {/* Stop Name */}
@@ -77,17 +82,12 @@ export function StopCard({ stop, isActive, showTimer = true }: StopCardProps) {
         {stop.address}
       </button>
 
-      {/* Status and Distance */}
-      <div className="flex justify-between items-center">
-        <div className={`font-mono text-sm font-bold ${getStatusColor()}`}>
-          {getStatusDisplay()}
+      {/* Distance */}
+      {stop.distanceToNext && (
+        <div className="text-retro-green/60 font-mono text-sm mb-2">
+          Next: {stop.distanceToNext}
         </div>
-        {stop.distanceToNext && (
-          <div className="text-retro-green/60 font-mono text-sm">
-            Next: {stop.distanceToNext}
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Timestamps */}
       {(stop.arrivalTime || stop.departureTime) && (
