@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { SubwayProgressBar } from './components/Progress/SubwayProgressBar';
 
 // All types defined in one place
 interface Stop {
@@ -954,85 +955,22 @@ function SimpleApp() {
             />
           </div>
           
-          {/* Beer Mug Progress */}
+          {/* SHB Logo */}
           <div style={{ 
             display: 'flex', 
             alignItems: 'center', 
-            gap: '0.5rem',
+            justifyContent: 'flex-end',
             minWidth: 'fit-content'
           }}>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ 
-                fontSize: '0.75rem', 
-                color: '#A09376',
-                lineHeight: 1
-              }}>
-                PROGRESS
-              </div>
-              <div style={{ 
-                fontSize: '1rem', 
-                fontWeight: 'bold', 
-                color: '#B1CDFF',
-                lineHeight: 1
-              }}>
-                {progressPercentage}%
-              </div>
-            </div>
-            
-            {/* Beer Mug */}
-            <div style={{ 
-              position: 'relative',
-              width: '45px',
-              height: '65px',
-              marginRight: '0.5rem'
-            }}>
-              {/* Mug outline */}
-              <div style={{
-                position: 'absolute',
-                width: '36px',
-                height: '58px',
-                border: '3px solid #B1CDFF',
-                borderRadius: '0 0 10px 10px',
-                backgroundColor: 'transparent'
-              }}>
-                {/* Beer fill (empties as progress increases) */}
-                <div style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  width: '100%',
-                  height: `${100 - progressPercentage}%`,
-                  backgroundColor: '#FFBF00', // Beer color
-                  borderRadius: progressPercentage > 80 ? '0' : '0 0 6px 6px',
-                  transition: 'height 0.5s ease'
-                }}>
-                  {/* Foam layer */}
-                  {progressPercentage < 100 && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '-4px',
-                      left: 0,
-                      width: '100%',
-                      height: '6px',
-                      backgroundColor: '#FFF8DC',
-                      borderRadius: '2px'
-                    }}></div>
-                  )}
-                </div>
-              </div>
-              
-              {/* Mug handle */}
-              <div style={{
-                position: 'absolute',
-                right: '-4px',
-                top: '11px',
-                width: '16px',
-                height: '30px',
-                border: '3px solid #B1CDFF',
-                borderLeft: 'none',
-                borderRadius: '0 6px 6px 0'
-              }}></div>
-            </div>
+            <img 
+              src="/src/assets/SHB_logo.png" 
+              alt="SHB Logo" 
+              style={{ 
+                height: '70px', 
+                width: 'auto',
+                objectFit: 'contain'
+              }}
+            />
           </div>
         </div>
       </div>
@@ -1117,16 +1055,36 @@ function SimpleApp() {
         }} />
       </div>
 
-      {/* Scrollable Route List */}
+      {/* Scrollable Route List with integrated progress bar */}
       <div
         ref={routeListRef}
         style={{
           flex: 1,
           overflow: 'auto',
           padding: '1rem',
-          paddingTop: 'calc(45px + 1rem)' // Space for fixed marquee + normal padding
+          paddingTop: 'calc(45px + 1rem)', // Space for fixed marquee + normal padding
+          display: 'flex' // Use flexbox to align sidebar with cards
         }}
       >
+        {/* Subway Progress Bar - Full height tracker */}
+        <div style={{
+          alignSelf: 'stretch', // Stretch to full height
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between'
+        }}>
+          <SubwayProgressBar 
+            stops={event.stops}
+            currentStopIndex={event.currentStopIndex}
+            progressPercentage={progressPercentage}
+          />
+        </div>
+
+        {/* Station Cards Container */}
+        <div style={{
+          flex: 1,
+          paddingLeft: '0.5rem' // Tight spacing to save space
+        }}>
         {event.stops.map((stop, index) => {
           const isCompleted = stop.status === 'completed';
           const isActive = stop.status === 'active';
@@ -1177,10 +1135,12 @@ function SimpleApp() {
                 border: `${borderWidth} solid ${borderColor}`,
                 padding: '0.75rem',
                 marginBottom: '0.75rem',
+                marginRight: '0.5rem', // Reduce right margin
                 opacity,
                 boxShadow,
                 transform: isCurrentStop ? 'scale(1.02)' : 'scale(1)',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s ease',
+                width: '100%' // Full width of container
               }}
             >
               {/* Status or Timer in top right corner */}
@@ -1307,6 +1267,7 @@ function SimpleApp() {
             </div>
           );
         })}
+        </div> {/* Close station cards container */}
       </div>
 
       {/* Footer */}
