@@ -1,4 +1,3 @@
-import React from 'react';
 import { useEvent } from '../../context/EventContext';
 import { StopCard } from '../Stop/StopCard';
 
@@ -65,8 +64,8 @@ export function EventDisplay() {
             <StopCard 
               key={stop.id}
               stop={stop} 
-              isActive={index === state.event.currentStopIndex}
-              showTimer={index === state.event.currentStopIndex}
+              isActive={index === state.event!.currentStopIndex}
+              showTimer={index === state.event!.currentStopIndex}
             />
           ))}
         </div>

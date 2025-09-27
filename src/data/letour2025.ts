@@ -14,7 +14,7 @@ export const leTour2025: Event = {
       name: 'Grimm Central',
       address: '704 Crystal Drive',
       position: 0,
-      distanceToNext: '1.9 miles',
+      distanceToNext: '2.0 miles',
       status: 'pending'
     },
     {
@@ -54,7 +54,7 @@ export const leTour2025: Event = {
       name: 'Albert Avenue',
       address: '2856 Broadway Avenue',
       position: 5,
-      distanceToNext: '1.5 miles',
+      distanceToNext: '2.1 miles',
       status: 'pending'
     },
     {

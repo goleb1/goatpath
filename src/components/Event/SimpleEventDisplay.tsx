@@ -1,5 +1,5 @@
-import React from 'react';
 import { useEvent } from '../../context/EventContext';
+import { MarqueeSign } from '../MarqueeSign/MarqueeSign';
 
 export function SimpleEventDisplay() {
   const { state } = useEvent();
@@ -68,6 +68,9 @@ export function SimpleEventDisplay() {
           </div>
         </div>
       </div>
+
+      {/* Marquee Sign */}
+      <MarqueeSign />
 
       {/* Current Stop */}
       {currentStop && (
@@ -154,7 +157,7 @@ export function SimpleEventDisplay() {
             key={stop.id}
             style={{ 
               backgroundColor: '#1a1a1a', 
-              border: `2px solid ${index === state.event.currentStopIndex ? '#ffbf00' : '#00ff00'}`, 
+              border: `2px solid ${index === state.event!.currentStopIndex ? '#ffbf00' : '#00ff00'}`, 
               padding: '1rem',
               marginBottom: '1rem'
             }}
@@ -229,9 +232,9 @@ export function SimpleEventDisplay() {
       </div>
 
       {/* Footer */}
-      <div style={{ 
-        textAlign: 'center', 
-        color: 'rgba(0, 255, 0, 0.6)', 
+      <div style={{
+        textAlign: 'center',
+        color: 'rgba(0, 255, 0, 0.6)',
         fontSize: '0.75rem',
         marginTop: '2rem'
       }}>

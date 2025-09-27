@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, createContext, useContext, useReducer } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 // All types defined in one place
 interface Stop {
@@ -706,6 +706,87 @@ function SimpleApp() {
           </div>
         </div>
 
+        {/* Marquee Sign */}
+        <div style={{
+          position: 'absolute',
+          left: '0',
+          right: '0',
+          width: '100vw',
+          height: '45px',
+          backgroundColor: '#324E80',
+          borderTop: '2px solid #A09376',
+          borderBottom: '2px solid #A09376',
+          display: 'flex',
+          alignItems: 'center',
+          overflow: 'hidden',
+          zIndex: 5
+        }}>
+          <div
+            style={{
+              color: '#EBE4C1',
+              fontSize: '1rem',
+              fontFamily: 'JetBrains Mono, monospace',
+              fontWeight: 'bold',
+              whiteSpace: 'nowrap',
+              animation: 'marqueeScroll 12s linear infinite'
+            }}
+          >
+            ★ {(() => {
+              // Same logic as public view but with admin indicator
+              const currentStop = event.stops[event.currentStopIndex];
+              if (!currentStop) return "ADMIN CONTROL - WELCOME ABOARD SHBAC EXPRESS";
+
+              if (currentStop.status === 'active') {
+                const stationMessages: Record<string, string> = {
+                  "Grimm Central": "NOW AT GRIMM CENTRAL - FUEL UP AND STRETCH THOSE LEGS!",
+                  "McGee Metro": "WELCOME TO MCGEE METRO - QUICK STOP FOR REFRESHMENTS!",
+                  "Brasacchio Boulevard": "NOW ARRIVING BRASACCHIO BOULEVARD - ENJOY THE VALLEY VIEWS!",
+                  "Styler Station": "BRIEF STOP AT STYLER STATION - SHORTEST SEGMENT AHEAD BUT DON'T GET TOO COMFORTABLE!",
+                  "Holliday Heights": "WELCOME TO HOLLIDAY HEIGHTS - CROSSING INTO BROOKLINE TERRITORY AHEAD!",
+                  "Albert Avenue": "QUICK PIT STOP AT ALBERT AVENUE - HALFWAY HOME, HILLBILLIES!",
+                  "Baird Terminal": "NOW AT BAIRD TERMINAL - PREPARE FOR THE STEEPEST CLIMB OF THE DAY!",
+                  "Golebie Grand": "PENULTIMATE STOP: GOLEBIE GRAND! ONE MORE SEGMENT TO GO!",
+                  "Baldasare Union": "THANK YOU FOR RIDING SHBAC EXPRESS - PLEASE EXIT SAFELY!"
+                };
+                return stationMessages[currentStop.name] || `NOW AT ${currentStop.name.toUpperCase()}`;
+              } else if (currentStop.status === 'pending' && event.currentStopIndex > 0) {
+                // En route to current stop (previous stop was completed)
+                const previousStop = event.stops[event.currentStopIndex - 1];
+                if (previousStop && previousStop.status === 'completed') {
+                  const enRouteMessages: Record<string, string> = {
+                    "McGee Metro": "NEXT STOP MCGEE METRO IN 2 MILES - WATCH YOUR STEP AND MIND THE HILLS!",
+                    "Brasacchio Boulevard": "EXPRESS SERVICE TO BRASACCHIO BOULEVARD - 1.0 MILE OF SCENIC SOUTH HILLS AHEAD!",
+                    "Styler Station": "EN ROUTE TO STYLER STATION - 1.6 MILES OF ROLLING TERRAIN, PLEASE HOLD ON!",
+                    "Holliday Heights": "NOW DEPARTING FOR HOLLIDAY HEIGHTS - ONLY 0.9 MILES! PACE YOURSELVES, HILLBILLIES!",
+                    "Albert Avenue": "CLIMBING 150 FEET OVER 2.9 MILES TO ALBERT AVENUE - STEADY AS SHE GOES!",
+                    "Baird Terminal": "ALL ABOARD FOR BAIRD TERMINAL - 2.1 MILES TO GO!",
+                    "Golebie Grand": "STEEPEST CLIMB AHEAD TO GOLEBIE GRAND - 1.2 MILES OF CHARACTER BUILDING!",
+                    "Baldasare Union": "FINAL APPROACH TO BALDASARE UNION - 2.1 MILES TO VICTORY!"
+                  };
+                  return enRouteMessages[currentStop.name] || `EN ROUTE TO ${currentStop.name.toUpperCase()}`;
+                }
+              } else if (currentStop.status === 'completed' && event.currentStopIndex === event.stops.length - 1) {
+                // Last stop completed
+                return "THANK YOU FOR RIDING SHBAC EXPRESS - PLEASE EXIT SAFELY!";
+              }
+
+              // Default: Event not started or first stop pending
+              return "ADMIN CONTROL - WELCOME ABOARD SHBAC EXPRESS";
+            })()} ★
+          </div>
+          <style dangerouslySetInnerHTML={{
+            __html: `
+              @keyframes marqueeScroll {
+                0% { transform: translateX(100%); }
+                100% { transform: translateX(-100%); }
+              }
+            `
+          }} />
+        </div>
+
+        {/* Spacer for marquee */}
+        <div style={{ height: '45px', marginBottom: '1rem' }}></div>
+
         {/* Current Activity Status */}
         <CurrentActivityStatus event={event} />
 
@@ -989,14 +1070,94 @@ function SimpleApp() {
         </div>
       </div>
 
+      {/* Marquee Sign - Fixed position just below header */}
+      <div style={{
+        position: 'fixed',
+        top: '97px', // Position just below the sticky header
+        left: '0',
+        right: '0',
+        width: '100vw',
+        height: '45px',
+        backgroundColor: '#324E80',
+        borderTop: '2px solid #B1CDFF',
+        borderBottom: '2px solid #B1CDFF',
+        display: 'flex',
+        alignItems: 'center',
+        overflow: 'hidden',
+        zIndex: 8 // Lower than header's zIndex: 10
+      }}>
+        <div
+          style={{
+            color: '#EBE4C1',
+            fontSize: '1rem',
+            fontFamily: 'JetBrains Mono, monospace',
+            fontWeight: 'bold',
+            whiteSpace: 'nowrap',
+            animation: 'marqueeScroll 12s linear infinite'
+          }}
+        >
+          ★ {(() => {
+            // Determine current message based on event state
+            const currentStop = event.stops[event.currentStopIndex];
+            if (!currentStop) return "WELCOME ABOARD SHBAC EXPRESS";
+
+            if (currentStop.status === 'active') {
+              // At a station
+              const stationMessages: Record<string, string> = {
+                "Grimm Central": "NOW AT GRIMM CENTRAL - FUEL UP AND STRETCH THOSE LEGS!",
+                "McGee Metro": "WELCOME TO MCGEE METRO - QUICK STOP FOR REFRESHMENTS!",
+                "Brasacchio Boulevard": "NOW ARRIVING BRASACCHIO BOULEVARD - ENJOY THE VALLEY VIEWS!",
+                "Styler Station": "BRIEF STOP AT STYLER STATION - SHORTEST SEGMENT AHEAD BUT DON'T GET TOO COMFORTABLE!",
+                "Holliday Heights": "WELCOME TO HOLLIDAY HEIGHTS - CROSSING INTO BROOKLINE TERRITORY AHEAD!",
+                "Albert Avenue": "QUICK PIT STOP AT ALBERT AVENUE - HALFWAY HOME, HILLBILLIES!",
+                "Baird Terminal": "NOW AT BAIRD TERMINAL - PREPARE FOR THE STEEPEST CLIMB OF THE DAY!",
+                "Golebie Grand": "PENULTIMATE STOP: GOLEBIE GRAND! ONE MORE SEGMENT TO GO!",
+                "Baldasare Union": "THANK YOU FOR RIDING SHBAC EXPRESS - PLEASE EXIT SAFELY!"
+              };
+              return stationMessages[currentStop.name] || `NOW AT ${currentStop.name.toUpperCase()}`;
+            } else if (currentStop.status === 'pending' && event.currentStopIndex > 0) {
+              // En route to current stop (previous stop was completed)
+              const previousStop = event.stops[event.currentStopIndex - 1];
+              if (previousStop && previousStop.status === 'completed') {
+                const enRouteMessages: Record<string, string> = {
+                  "McGee Metro": "NEXT STOP MCGEE METRO IN 2 MILES - WATCH YOUR STEP AND MIND THE HILLS!",
+                  "Brasacchio Boulevard": "EXPRESS SERVICE TO BRASACCHIO BOULEVARD - 1.0 MILE OF SCENIC SOUTH HILLS AHEAD!",
+                  "Styler Station": "EN ROUTE TO STYLER STATION - 1.6 MILES OF ROLLING TERRAIN, PLEASE HOLD ON!",
+                  "Holliday Heights": "NOW DEPARTING FOR HOLLIDAY HEIGHTS - ONLY 0.9 MILES! PACE YOURSELVES, HILLBILLIES!",
+                  "Albert Avenue": "CLIMBING 150 FEET OVER 2.9 MILES TO ALBERT AVENUE - STEADY AS SHE GOES!",
+                  "Baird Terminal": "ALL ABOARD FOR BAIRD TERMINAL - 2.1 MILES TO GO!",
+                  "Golebie Grand": "STEEPEST CLIMB AHEAD TO GOLEBIE GRAND - 1.2 MILES OF CHARACTER BUILDING!",
+                  "Baldasare Union": "FINAL APPROACH TO BALDASARE UNION - 2.1 MILES TO VICTORY!"
+                };
+                return enRouteMessages[currentStop.name] || `EN ROUTE TO ${currentStop.name.toUpperCase()}`;
+              }
+            } else if (currentStop.status === 'completed' && event.currentStopIndex === event.stops.length - 1) {
+              // Last stop completed
+              return "THANK YOU FOR RIDING SHBAC EXPRESS - PLEASE EXIT SAFELY!";
+            }
+
+            // Default: Event not started or first stop pending
+            return "WELCOME ABOARD SHBAC EXPRESS!";
+          })()} ★
+        </div>
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            @keyframes marqueeScroll {
+              0% { transform: translateX(100%); }
+              100% { transform: translateX(-100%); }
+            }
+          `
+        }} />
+      </div>
+
       {/* Scrollable Route List */}
-      <div 
+      <div
         ref={routeListRef}
-        style={{ 
+        style={{
           flex: 1,
           overflow: 'auto',
           padding: '1rem',
-          paddingTop: '1rem'
+          paddingTop: 'calc(45px + 1rem)' // Space for fixed marquee + normal padding
         }}
       >
         {event.stops.map((stop, index) => {

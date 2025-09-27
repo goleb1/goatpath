@@ -1,5 +1,6 @@
 import React from 'react';
 import { useEvent } from '../../context/EventContext';
+import { MarqueeSign } from '../MarqueeSign/MarqueeSign';
 
 export function SimpleAdminPanel() {
   const { state, dispatch } = useEvent();
@@ -79,6 +80,9 @@ export function SimpleAdminPanel() {
           {state.event.title.toUpperCase()}
         </div>
       </div>
+
+      {/* Marquee Sign */}
+      <MarqueeSign />
 
       {/* Current Stop Control */}
       {currentStop && (
