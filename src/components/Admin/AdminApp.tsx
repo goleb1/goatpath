@@ -549,7 +549,7 @@ export function AdminApp() {
       {/* Marquee Sign - Fixed position just below header */}
       <div style={{
         position: 'fixed',
-        top: '95px', // Position just below the sticky header
+        top: '80px', // Position just below the sticky header
         left: '0',
         right: '0',
         width: '100%', // Use 100% instead of 100vw to avoid scrollbar issues
@@ -634,7 +634,7 @@ export function AdminApp() {
       {/* Content Container with proper spacing */}
       <div style={{
         flex: 1,
-        padding: 'calc(95px + 45px + 1rem) 1rem 1rem 0.25rem', // Add space for header + marquee + normal padding
+        padding: 'calc(80px + 45px + 1rem) 1rem 1rem 0.25rem', // Add space for header + marquee + normal padding
         overflow: 'auto'
       }}>
         {/* Station Cards - Previous, Current, Next */}
