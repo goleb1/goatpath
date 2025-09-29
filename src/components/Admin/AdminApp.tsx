@@ -649,10 +649,12 @@ export function AdminApp() {
   return (
     <div style={{
       minHeight: '100vh',
+      width: '100%',
       backgroundColor: '#231F20', // Thunder background
       fontFamily: 'JetBrains Mono, monospace',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      overflowX: 'hidden' // Prevent horizontal scrolling
     }}>
       {/* Fixed Header - Edge to Edge */}
       <div style={{
@@ -735,7 +737,7 @@ export function AdminApp() {
         top: '95px', // Position just below the sticky header
         left: '0',
         right: '0',
-        width: '100vw',
+        width: '100%', // Use 100% instead of 100vw to avoid scrollbar issues
         height: '45px',
         backgroundColor: '#324E80',
         borderTop: '2px solid #A09376', // Admin color instead of Melrose

@@ -270,13 +270,15 @@ function SimpleApp() {
 
   // Main Public View (no authentication required)
   return (
-    <div style={{ 
-      minHeight: '100vh', 
+    <div style={{
+      minHeight: '100vh',
+      width: '100%',
       backgroundColor: '#231F20', // Thunder background
       fontFamily: 'JetBrains Mono, monospace',
       color: '#EBE4C1', // Fall Green default text
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      overflowX: 'hidden' // Prevent horizontal scrolling
     }}>
       {/* Fixed Header - Edge to Edge */}
       <div style={{ 
@@ -339,7 +341,7 @@ function SimpleApp() {
         top: '95px', // Position just below the sticky header
         left: '0',
         right: '0',
-        width: '100vw',
+        width: '100%',
         height: '45px',
         backgroundColor: '#324E80',
         borderTop: '2px solid #B1CDFF',
