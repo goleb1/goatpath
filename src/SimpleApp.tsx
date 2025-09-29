@@ -259,8 +259,23 @@ function SimpleApp() {
     }
   }, [event]);
 
+  // Function to get the appropriate goat logo based on progress
+  const getGoatLogo = () => {
+    if (!event) return "/src/assets/goat1.png";
 
+    const completedStops = event.stops.filter(s => s.status === 'completed').length;
 
+    // Progressive drunkenness based on completed stops
+    if (completedStops <= 2) {
+      return "/src/assets/goat1.png"; // Sober goat (start through stop 2)
+    } else if (completedStops <= 4) {
+      return "/src/assets/goat2.png"; // Slightly tipsy (stops 3-4)
+    } else if (completedStops <= 6) {
+      return "/src/assets/goat3.png"; // Getting drunk (stops 5-6)
+    } else {
+      return "/src/assets/goat4.png"; // Very drunk (stops 7-8+)
+    }
+  };
 
   if (!event) return null;
 
@@ -281,13 +296,16 @@ function SimpleApp() {
       overflowX: 'hidden' // Prevent horizontal scrolling
     }}>
       {/* Fixed Header - Edge to Edge */}
-      <div style={{ 
+      <div style={{
         backgroundColor: '#231F20', // Thunder background to match
         borderBottom: '3px solid #B1CDFF', // Melrose bottom border
-        padding: '0.75rem 1rem', 
+        padding: '0.75rem 1rem',
         textAlign: 'center',
-        position: 'sticky',
+        position: 'fixed',
         top: 0,
+        left: 0,
+        right: 0,
+        width: '100%',
         zIndex: 10,
         boxShadow: '0 2px 10px rgba(0,0,0,0.5)'
       }}>
@@ -322,11 +340,11 @@ function SimpleApp() {
             justifyContent: 'flex-end',
             minWidth: 'fit-content'
           }}>
-            <img 
-              src="/src/assets/SHB_logo.png" 
-              alt="SHB Logo" 
-              style={{ 
-                height: '70px', 
+            <img
+              src={getGoatLogo()}
+              alt="SHB Goat Logo"
+              style={{
+                height: '70px',
                 width: 'auto',
                 objectFit: 'contain'
               }}
@@ -428,7 +446,7 @@ function SimpleApp() {
           flex: 1,
           overflow: 'auto',
           padding: '1rem',
-          paddingTop: 'calc(45px + 1rem)', // Space for fixed marquee + normal padding
+          paddingTop: 'calc(95px + 45px + 1rem)', // Space for header + marquee + normal padding
           display: 'flex' // Use flexbox to align sidebar with cards
         }}
       >

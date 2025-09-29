@@ -575,7 +575,15 @@ export function AdminApp() {
 
   const resetEvent = () => {
     if (window.confirm('Reset entire event? This will clear all progress.')) {
-      setEvent(null);
+      // Create a fresh copy of the default event
+      const resetEvent = { ...leTour2025 };
+      // Clear any existing localStorage data
+      localStorage.removeItem(STORAGE_KEYS.EVENT);
+      localStorage.removeItem(STORAGE_KEYS.LAST_UPDATE);
+      // Set the fresh event (this will trigger the save effect)
+      setEvent(resetEvent);
+      // Clear the last action for undo
+      setLastAction(null);
     }
   };
 
@@ -662,8 +670,11 @@ export function AdminApp() {
         borderBottom: '3px solid #A09376', // Donkey Brown border for admin
         padding: '0.75rem 1rem',
         textAlign: 'center',
-        position: 'sticky',
+        position: 'fixed',
         top: 0,
+        left: 0,
+        right: 0,
+        width: '100%',
         zIndex: 10,
         boxShadow: '0 2px 10px rgba(0,0,0,0.5)'
       }}>
@@ -819,7 +830,7 @@ export function AdminApp() {
       {/* Content Container with proper spacing */}
       <div style={{
         flex: 1,
-        padding: 'calc(45px + 1rem) 1rem 1rem 0.25rem', // Add space for marquee + normal padding
+        padding: 'calc(95px + 45px + 1rem) 1rem 1rem 0.25rem', // Add space for header + marquee + normal padding
         overflow: 'auto'
       }}>
         {/* Station Cards - Previous, Current, Next */}
