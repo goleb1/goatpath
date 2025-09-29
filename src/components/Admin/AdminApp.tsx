@@ -499,7 +499,7 @@ export function AdminApp() {
               src="/SHBACExpress.png"
               alt="SHBAC Express"
               style={{
-                height: '70px',
+                height: '50px',
                 width: 'auto',
                 objectFit: 'contain'
               }}
