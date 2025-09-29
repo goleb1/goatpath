@@ -25,6 +25,7 @@ interface Event {
   createdAt: string;
   updatedAt: string;
   currentStopIndex: number;
+  customMessage?: string;
 }
 
 // Sample data
@@ -349,6 +350,7 @@ function SimpleApp() {
         zIndex: 8 // Lower than header's zIndex: 10
       }}>
         <div
+          key={event.customMessage || 'preset'} // Force re-render when message type changes
           style={{
             color: '#EBE4C1',
             fontSize: '1rem',
@@ -359,6 +361,11 @@ function SimpleApp() {
           }}
         >
           ★ {(() => {
+            // Check for custom message first
+            if (event.customMessage) {
+              return event.customMessage;
+            }
+
             // Determine current message based on event state
             const currentStop = event.stops[event.currentStopIndex];
             if (!currentStop) return "WELCOME ABOARD SHBAC EXPRESS";

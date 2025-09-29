@@ -25,6 +25,7 @@ interface Event {
   createdAt: string;
   updatedAt: string;
   currentStopIndex: number;
+  customMessage?: string;
 }
 
 // Storage keys
@@ -456,6 +457,8 @@ export function AdminApp() {
     stopName: string;
     previousState: Event;
   } | null>(null);
+  const [customMessage, setCustomMessage] = useState('');
+  const [showMessageInput, setShowMessageInput] = useState(false);
 
   // Load event from localStorage on mount
   useEffect(() => {
@@ -579,6 +582,39 @@ export function AdminApp() {
   const logout = () => {
     localStorage.removeItem('goatpath_admin_auth');
     window.location.href = '/admin'; // Redirect to admin login
+  };
+
+  const handleSetCustomMessage = () => {
+    if (!event || !customMessage.trim()) return;
+
+    const updatedEvent = {
+      ...event,
+      customMessage: customMessage.trim(),
+      updatedAt: new Date().toISOString()
+    };
+
+    setEvent(updatedEvent);
+    setCustomMessage('');
+    setShowMessageInput(false);
+  };
+
+  const handleClearCustomMessage = () => {
+    if (!event) return;
+
+    const { customMessage: _, ...eventWithoutCustomMessage } = event;
+    const updatedEvent = {
+      ...eventWithoutCustomMessage,
+      updatedAt: new Date().toISOString()
+    };
+
+    setEvent(updatedEvent);
+  };
+
+  const toggleMessageInput = () => {
+    setShowMessageInput(!showMessageInput);
+    if (!showMessageInput) {
+      setCustomMessage('');
+    }
   };
 
   if (!event) return null;
@@ -710,6 +746,7 @@ export function AdminApp() {
         zIndex: 8 // Lower than header's zIndex: 10
       }}>
         <div
+          key={event.customMessage || 'preset'} // Force re-render when message type changes
           style={{
             color: '#EBE4C1',
             fontSize: '1rem',
@@ -720,6 +757,11 @@ export function AdminApp() {
           }}
         >
           ★ {(() => {
+            // Use custom message if available, otherwise use preset logic
+            if (event.customMessage) {
+              return event.customMessage;
+            }
+
             // Same logic as public view but with admin indicator
             const currentStop = event.stops[event.currentStopIndex];
             if (!currentStop) return "ADMIN CONTROL - WELCOME ABOARD SHBAC EXPRESS";
@@ -1062,6 +1104,163 @@ export function AdminApp() {
                 );
               });
             })()}
+          </div>
+        </div>
+
+        {/* Custom Message Controls */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'stretch',
+          gap: '0.25rem',
+          marginBottom: '1rem',
+          paddingTop: '1rem',
+          paddingBottom: '1rem',
+          borderTop: '1px solid #7195CD'
+        }}>
+          {/* Label for alignment */}
+          <div style={{
+            fontSize: '0.75rem',
+            fontWeight: 'bold',
+            color: '#A09376',
+            writingMode: 'vertical-rl',
+            textOrientation: 'mixed',
+            transform: 'rotate(180deg)',
+            minWidth: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            MESSAGE
+          </div>
+
+          {/* Message Controls */}
+          <div style={{
+            flex: 1,
+            backgroundColor: '#231F20',
+            border: '2px solid #7195CD', // Blue border instead of brown
+            padding: '0.75rem',
+            borderRadius: '4px' // Add slight rounded corners
+          }}>
+            <div style={{
+              color: event.customMessage ? '#EBE4C1' : '#7195CD', // Yellow when active, blue when inactive
+              fontWeight: 'bold',
+              marginBottom: '0.75rem',
+              fontSize: '0.875rem'
+            }}>
+              CUSTOM MARQUEE MESSAGE
+            </div>
+
+            {!showMessageInput ? (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '0.75rem'
+              }}>
+                <button
+                  onClick={toggleMessageInput}
+                  style={{
+                    padding: '0.75rem',
+                    backgroundColor: '#B1CDFF',
+                    color: '#231F20',
+                    fontFamily: 'JetBrains Mono, monospace',
+                    fontWeight: 'bold',
+                    fontSize: '0.875rem',
+                    border: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  ✏ SET MESSAGE
+                </button>
+                <button
+                  onClick={handleClearCustomMessage}
+                  disabled={!event.customMessage}
+                  style={{
+                    padding: '0.75rem',
+                    backgroundColor: event.customMessage ? '#A09376' : 'rgba(160, 147, 118, 0.3)',
+                    color: event.customMessage ? '#EBE4C1' : 'rgba(235, 228, 193, 0.5)',
+                    fontFamily: 'JetBrains Mono, monospace',
+                    fontWeight: 'bold',
+                    fontSize: '0.875rem',
+                    border: 'none',
+                    cursor: event.customMessage ? 'pointer' : 'not-allowed'
+                  }}
+                >
+                  ✗ CLEAR
+                </button>
+              </div>
+            ) : (
+              <div style={{ marginBottom: '0.75rem' }}>
+                <div style={{
+                  backgroundColor: '#231F20',
+                  border: '1px solid #7195CD',
+                  padding: '0.75rem',
+                  marginBottom: '0.75rem'
+                }}>
+                  <input
+                    type="text"
+                    value={customMessage}
+                    onChange={(e) => setCustomMessage(e.target.value.toUpperCase())}
+                    placeholder="ENTER CUSTOM MESSAGE..."
+                    style={{
+                      width: '100%',
+                      backgroundColor: 'transparent',
+                      color: '#B1CDFF',
+                      fontFamily: 'JetBrains Mono, monospace',
+                      fontSize: '0.875rem',
+                      border: 'none',
+                      outline: 'none',
+                      textTransform: 'uppercase'
+                    }}
+                    maxLength={100}
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleSetCustomMessage();
+                      } else if (e.key === 'Escape') {
+                        toggleMessageInput();
+                      }
+                    }}
+                  />
+                </div>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '0.75rem'
+                }}>
+                  <button
+                    onClick={handleSetCustomMessage}
+                    disabled={!customMessage.trim()}
+                    style={{
+                      padding: '0.75rem',
+                      backgroundColor: customMessage.trim() ? '#B1CDFF' : 'rgba(177, 205, 255, 0.3)',
+                      color: customMessage.trim() ? '#231F20' : 'rgba(35, 31, 32, 0.5)',
+                      fontFamily: 'JetBrains Mono, monospace',
+                      fontWeight: 'bold',
+                      fontSize: '0.875rem',
+                      border: 'none',
+                      cursor: customMessage.trim() ? 'pointer' : 'not-allowed'
+                    }}
+                  >
+                    ✓ POST
+                  </button>
+                  <button
+                    onClick={toggleMessageInput}
+                    style={{
+                      padding: '0.75rem',
+                      backgroundColor: '#231F20',
+                      color: '#B1CDFF',
+                      fontFamily: 'JetBrains Mono, monospace',
+                      fontWeight: 'bold',
+                      fontSize: '0.875rem',
+                      border: '1px solid #7195CD',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    ✗ CANCEL
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

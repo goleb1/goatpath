@@ -28,4 +28,5 @@ export interface Event {
   createdAt: string;
   updatedAt: string;
   currentStopIndex: number;
+  customMessage?: string;
 }

@@ -12,7 +12,9 @@ export type EventAction =
   | { type: 'SET_ADMIN'; payload: boolean }
   | { type: 'UPDATE_STOP_STATUS'; payload: { stopId: string; status: Stop['status']; timestamp?: string } }
   | { type: 'ADVANCE_TO_NEXT_STOP' }
-  | { type: 'RESET_EVENT' };
+  | { type: 'RESET_EVENT' }
+  | { type: 'SET_CUSTOM_MESSAGE'; payload: string }
+  | { type: 'CLEAR_CUSTOM_MESSAGE' };
 
 export const initialState: EventState = {
   event: null,
@@ -63,6 +65,21 @@ export function eventReducer(state: EventState, action: EventAction): EventState
     }
     case 'RESET_EVENT':
       return initialState;
+    case 'SET_CUSTOM_MESSAGE': {
+      if (!state.event) return state;
+      return {
+        ...state,
+        event: { ...state.event, customMessage: action.payload, updatedAt: new Date().toISOString() }
+      };
+    }
+    case 'CLEAR_CUSTOM_MESSAGE': {
+      if (!state.event) return state;
+      const { customMessage, ...eventWithoutCustomMessage } = state.event;
+      return {
+        ...state,
+        event: { ...eventWithoutCustomMessage, updatedAt: new Date().toISOString() }
+      };
+    }
     default:
       return state;
   }

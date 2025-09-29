@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { useEvent } from '../../context/useEventExport';
 import { StopCard } from '../Stop/StopCard';
 
 export function AdminPanel() {
   const { state, dispatch } = useEvent();
-  
+  const [customMessage, setCustomMessage] = useState('');
+  const [showMessageInput, setShowMessageInput] = useState(false);
+
   if (!state.event) return null;
 
   const currentStop = state.event.stops[state.event.currentStopIndex];
@@ -43,6 +46,25 @@ export function AdminPanel() {
   const handleReset = () => {
     if (window.confirm('Reset entire event? This will clear all progress.')) {
       dispatch({ type: 'RESET_EVENT' });
+    }
+  };
+
+  const handleSetCustomMessage = () => {
+    if (customMessage.trim()) {
+      dispatch({ type: 'SET_CUSTOM_MESSAGE', payload: customMessage.trim() });
+      setCustomMessage('');
+      setShowMessageInput(false);
+    }
+  };
+
+  const handleClearCustomMessage = () => {
+    dispatch({ type: 'CLEAR_CUSTOM_MESSAGE' });
+  };
+
+  const toggleMessageInput = () => {
+    setShowMessageInput(!showMessageInput);
+    if (!showMessageInput) {
+      setCustomMessage('');
     }
   };
 
@@ -132,13 +154,89 @@ export function AdminPanel() {
         </div>
       )}
 
-      {/* Emergency Reset */}
+      {/* Custom Message Controls */}
+      <div className="mt-8 pt-8 border-t border-retro-amber/30">
+        <h3 className="text-retro-green font-mono font-bold mb-4">CUSTOM MARQUEE MESSAGE</h3>
+
+        {!showMessageInput ? (
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              onClick={toggleMessageInput}
+              className="py-3 px-4 bg-retro-amber text-retro-bg font-mono font-bold hover:bg-retro-green transition-colors"
+            >
+              ✏ SET MESSAGE
+            </button>
+            <button
+              onClick={handleClearCustomMessage}
+              className={`py-3 px-4 font-mono font-bold transition-colors ${
+                state.event.customMessage
+                  ? 'bg-retro-red text-white hover:bg-red-700'
+                  : 'bg-retro-red/30 text-white/50 cursor-not-allowed'
+              }`}
+              disabled={!state.event.customMessage}
+            >
+              ✗ CLEAR
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="bg-retro-bg-light border border-retro-green/50 p-3">
+              <input
+                type="text"
+                value={customMessage}
+                onChange={(e) => setCustomMessage(e.target.value)}
+                placeholder="Enter custom message..."
+                className="w-full bg-transparent text-retro-green font-mono placeholder-retro-green/50 outline-none"
+                maxLength={100}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSetCustomMessage();
+                  } else if (e.key === 'Escape') {
+                    toggleMessageInput();
+                  }
+                }}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                onClick={handleSetCustomMessage}
+                disabled={!customMessage.trim()}
+                className={`py-3 px-4 font-mono font-bold transition-colors ${
+                  customMessage.trim()
+                    ? 'bg-retro-green text-retro-bg hover:bg-retro-amber'
+                    : 'bg-retro-green/30 text-retro-bg/50 cursor-not-allowed'
+                }`}
+              >
+                ✓ POST
+              </button>
+              <button
+                onClick={toggleMessageInput}
+                className="py-3 px-4 bg-retro-bg-light border border-retro-green/50 text-retro-green font-mono font-bold hover:bg-retro-green/20 transition-colors"
+              >
+                ✗ CANCEL
+              </button>
+            </div>
+          </div>
+        )}
+
+        {state.event.customMessage && (
+          <div className="mt-4 p-3 bg-retro-bg-light border border-retro-amber/50">
+            <div className="text-retro-green font-mono text-sm mb-1">CURRENT CUSTOM MESSAGE:</div>
+            <div className="text-retro-amber font-mono font-bold">
+              ★ {state.event.customMessage} ★
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Reset Event */}
       <div className="mt-8 pt-8 border-t border-retro-red/30">
         <button
           onClick={handleReset}
           className="w-full py-3 bg-retro-red text-white font-mono font-bold hover:bg-red-700 transition-colors"
         >
-          ⚠ EMERGENCY RESET EVENT ⚠
+          ⚠ RESET EVENT ⚠
         </button>
       </div>
 
