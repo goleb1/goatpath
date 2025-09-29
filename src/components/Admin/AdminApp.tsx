@@ -496,7 +496,7 @@ export function AdminApp() {
             justifyContent: 'left'
           }}>
             <img
-              src="/src/assets/SHBACExpress.png"
+              src="/SHBACExpress.png"
               alt="SHBAC Express"
               style={{
                 height: '70px',

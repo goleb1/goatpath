@@ -261,19 +261,19 @@ function SimpleApp() {
 
   // Function to get the appropriate goat logo based on progress
   const getGoatLogo = () => {
-    if (!event) return "/src/assets/goat1.png";
+    if (!event) return "/goat1.png";
 
     const completedStops = event.stops.filter(s => s.status === 'completed').length;
 
     // Progressive drunkenness based on completed stops
     if (completedStops <= 2) {
-      return "/src/assets/goat1.png"; // Sober goat (start through stop 2)
+      return "/goat1.png"; // Sober goat (start through stop 2)
     } else if (completedStops <= 4) {
-      return "/src/assets/goat2.png"; // Slightly tipsy (stops 3-4)
+      return "/goat2.png"; // Slightly tipsy (stops 3-4)
     } else if (completedStops <= 6) {
-      return "/src/assets/goat3.png"; // Getting drunk (stops 5-6)
+      return "/goat3.png"; // Getting drunk (stops 5-6)
     } else {
-      return "/src/assets/goat4.png"; // Very drunk (stops 7-8+)
+      return "/goat4.png"; // Very drunk (stops 7-8+)
     }
   };
 
@@ -323,7 +323,7 @@ function SimpleApp() {
             justifyContent: 'left'
           }}>
             <img 
-              src="/src/assets/SHBACExpress.png" 
+              src="/SHBACExpress.png" 
               alt="SHBAC Express" 
               style={{ 
                 height: '70px', 
