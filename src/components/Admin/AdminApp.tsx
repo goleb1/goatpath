@@ -236,15 +236,15 @@ function RouteCardTimer({ event, stop, index }: { event: Event; stop: Stop; inde
 
   return (
     <div style={{
-      padding: '0.5rem 0.75rem',
+      padding: '0.25rem 0.5rem',
       backgroundColor: '#231F20',
       border: '1px solid #B1CDFF',
       borderRadius: '4px',
       textAlign: 'center',
-      minWidth: '80px'
+      minWidth: '60px'
     }}>
       <div style={{
-        fontSize: '1.25rem',
+        fontSize: '0.875rem',
         fontWeight: 'bold',
         color: '#EBE4C1',
         fontFamily: 'monospace',
@@ -775,7 +775,7 @@ export function AdminApp() {
                     ) : (
                       <div style={{
                         position: 'absolute',
-                        top: '2.5rem',
+                        top: '1rem',
                         right: '0.75rem',
                         display: 'flex',
                         justifyContent: 'flex-end'
