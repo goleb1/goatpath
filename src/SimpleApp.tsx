@@ -576,8 +576,8 @@ function SimpleApp() {
                          '#A09376' // Muted brown for future stops
                 }}>
                   {String(stop.position + 1).padStart(2, '0')}
-                  {isCurrentStop && ' ← 🍺 AT STOP'}
-                  {isRunningTo && ' ← 🏃‍♂️ RUNNING TO'}
+                  {isCurrentStop && ' ← AT STOP'}
+                  {isRunningTo && ' ← RUNNING TO'}
                 </div>
               </div>
               <h3 style={{ 

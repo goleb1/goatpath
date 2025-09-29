@@ -549,7 +549,7 @@ export function AdminApp() {
       {/* Marquee Sign - Fixed position just below header */}
       <div style={{
         position: 'fixed',
-        top: '80px', // Position just below the sticky header
+        top: '85px', // Position just below the sticky header
         left: '0',
         right: '0',
         width: '100%', // Use 100% instead of 100vw to avoid scrollbar issues
@@ -798,8 +798,8 @@ export function AdminApp() {
                                '#A09376' // Muted brown for future stops
                       }}>
                         {String(stop.position + 1).padStart(2, '0')}
-                        {isActive && ' ← 🍺 AT STOP'}
-                        {isRunningTo && ' ← 🏃‍♂️ RUNNING TO'}
+                        {isActive && ' ← AT STOP'}
+                        {isRunningTo && ' ← RUNNING TO'}
                       </div>
                     </div>
 
