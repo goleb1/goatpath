@@ -749,7 +749,7 @@ export function AdminApp() {
                       />
                     )}
 
-                    {/* Status or Timer in top right corner */}
+                    {/* Status in top right corner */}
                     {stop.status === 'completed' ? (
                       <div style={{
                         position: 'absolute',
@@ -772,17 +772,7 @@ export function AdminApp() {
                       }}>
                         UPCOMING
                       </div>
-                    ) : (
-                      <div style={{
-                        position: 'absolute',
-                        top: '1rem',
-                        right: '0.75rem',
-                        display: 'flex',
-                        justifyContent: 'flex-end'
-                      }}>
-                        <RouteCardTimer event={event} stop={stop} index={stop.position} />
-                      </div>
-                    )}
+                    ) : null}
 
                     <div style={{
                       display: 'flex',
@@ -801,6 +791,10 @@ export function AdminApp() {
                         {isActive && ' ← AT STOP'}
                         {isRunningTo && ' ← RUNNING TO'}
                       </div>
+                      {/* Timer aligned with status text */}
+                      {(isActive || isRunningTo) && (
+                        <RouteCardTimer event={event} stop={stop} index={stop.position} />
+                      )}
                     </div>
 
                     <h3 style={{
