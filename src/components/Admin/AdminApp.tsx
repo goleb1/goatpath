@@ -34,54 +34,6 @@ const STORAGE_KEYS = {
   LAST_UPDATE: 'goatpath_last_update'
 };
 
-// Timer Component
-function Timer({ stop, isActive }: { stop: Stop; isActive: boolean }) {
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
-
-  useEffect(() => {
-    if (!isActive || !stop.arrivalTime) {
-      setElapsedSeconds(0);
-      return;
-    }
-
-    const startTime = new Date(stop.arrivalTime);
-
-    const updateTimer = () => {
-      const now = new Date();
-      const diffMs = now.getTime() - startTime.getTime();
-      const diffSeconds = Math.floor(diffMs / 1000);
-      setElapsedSeconds(Math.max(0, diffSeconds));
-    };
-
-    updateTimer();
-    const interval = setInterval(updateTimer, 1000);
-
-    return () => clearInterval(interval);
-  }, [isActive, stop.arrivalTime]);
-
-  if (!isActive || !stop.arrivalTime) {
-    return null;
-  }
-
-  const minutes = Math.floor(elapsedSeconds / 60);
-  const seconds = elapsedSeconds % 60;
-
-  const getTimerColor = () => {
-    if (minutes >= 20) return '#A09376'; // Donkey Brown for long stays
-    if (minutes >= 10) return '#7195CD'; // Danube for medium stays
-    return '#B1CDFF'; // Melrose for fresh arrivals
-  };
-
-  return (
-    <div style={{
-      fontSize: '1.125rem',
-      fontWeight: 'bold',
-      color: getTimerColor()
-    }}>
-      ⏱ {minutes}:{seconds.toString().padStart(2, '0')}
-    </div>
-  );
-}
 
 // Visual Timer Dots Component for Admin
 function VisualTimerDots({ stop, isActive, isRunning }: { stop: Stop; isActive: boolean; isRunning: boolean }) {
@@ -304,150 +256,6 @@ function RouteCardTimer({ event, stop, index }: { event: Event; stop: Stop; inde
   );
 }
 
-// Current Activity Status Component
-function CurrentActivityStatus({ event }: { event: Event }) {
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
-
-  // Determine current activity using currentStopIndex and stop statuses
-  let activity: 'AT_STOP' | 'RUNNING' | 'NOT_STARTED' | 'FINISHED';
-  let locationName = '';
-  let startTime: Date | null = null;
-
-  // Check if event is finished (all stops completed)
-  const allCompleted = event.stops.every(stop => stop.status === 'completed');
-  if (allCompleted) {
-    activity = 'FINISHED';
-  } else {
-    // Get the current stop based on currentStopIndex
-    const currentStop = event.stops[event.currentStopIndex];
-
-    if (currentStop && currentStop.status === 'active' && currentStop.arrivalTime) {
-      // We're currently at a stop
-      activity = 'AT_STOP';
-      locationName = currentStop.name;
-      startTime = new Date(currentStop.arrivalTime);
-    } else if (currentStop && currentStop.status === 'pending') {
-      // Current stop is pending - check if we departed from previous stop
-      const previousStop = event.stops[event.currentStopIndex - 1];
-      if (previousStop && previousStop.status === 'completed' && previousStop.departureTime) {
-        // We departed from previous stop, so we're running to current stop
-        activity = 'RUNNING';
-        locationName = currentStop.name;
-        startTime = new Date(previousStop.departureTime);
-      } else {
-        // No previous completed stop - event not started yet
-        activity = 'NOT_STARTED';
-      }
-    } else {
-      // Check if any stops have been started
-      const hasStarted = event.stops.some(stop => stop.status !== 'pending');
-      if (hasStarted) {
-        // Something went wrong with state - try to recover
-        const activeStop = event.stops.find(stop => stop.status === 'active');
-        if (activeStop && activeStop.arrivalTime) {
-          activity = 'AT_STOP';
-          locationName = activeStop.name;
-          startTime = new Date(activeStop.arrivalTime);
-        } else {
-          activity = 'NOT_STARTED';
-        }
-      } else {
-        activity = 'NOT_STARTED';
-      }
-    }
-  }
-
-  useEffect(() => {
-    if (!startTime) {
-      setElapsedSeconds(0);
-      return;
-    }
-
-    const updateTimer = () => {
-      const now = new Date();
-      const diffMs = now.getTime() - startTime.getTime();
-      const diffSeconds = Math.floor(diffMs / 1000);
-      setElapsedSeconds(Math.max(0, diffSeconds));
-    };
-
-    updateTimer();
-    const interval = setInterval(updateTimer, 1000);
-
-    return () => clearInterval(interval);
-  }, [startTime]);
-
-  const minutes = Math.floor(elapsedSeconds / 60);
-  const seconds = elapsedSeconds % 60;
-
-  const getStatusColor = () => {
-    switch (activity) {
-      case 'AT_STOP': return '#B1CDFF'; // Melrose
-      case 'RUNNING': return '#7195CD'; // Danube
-      case 'NOT_STARTED': return '#A09376'; // Donkey Brown
-      case 'FINISHED': return '#EBE4C1'; // Fall Green
-    }
-  };
-
-  const getStatusText = () => {
-    switch (activity) {
-      case 'AT_STOP': return `🍺 AT STOP: ${locationName.toUpperCase()}`;
-      case 'RUNNING': return `🏃 RUNNING TO: ${locationName.toUpperCase()}`;
-      case 'NOT_STARTED': return '⏸ EVENT NOT STARTED';
-      case 'FINISHED': return '🎉 EVENT COMPLETE!';
-    }
-  };
-
-  return (
-    <div style={{
-      backgroundColor: '#324E80', // Chambray
-      border: `3px solid ${getStatusColor()}`,
-      padding: '1rem',
-      marginBottom: '1rem',
-      textAlign: 'center',
-      boxShadow: `0 0 25px ${getStatusColor()}33`
-    }}>
-      <div style={{
-        fontSize: '1.375rem',
-        fontWeight: 'bold',
-        color: getStatusColor(),
-        marginBottom: '0.375rem'
-      }}>
-        {getStatusText()}
-      </div>
-
-      {startTime && (
-        <div style={{
-          fontSize: '2rem',
-          fontWeight: 'bold',
-          color: '#EBE4C1', // Fall Green
-          fontFamily: 'monospace'
-        }}>
-          {minutes}:{seconds.toString().padStart(2, '0')}
-        </div>
-      )}
-
-      {activity === 'AT_STOP' && (
-        <div style={{
-          color: '#A09376', // Donkey Brown
-          fontSize: '0.875rem',
-          marginTop: '0.5rem'
-        }}>
-          Time at this stop
-        </div>
-      )}
-
-      {activity === 'RUNNING' && (
-        <div style={{
-          color: '#A09376', // Donkey Brown
-          fontSize: '0.875rem',
-          marginTop: '0.5rem'
-        }}>
-          Time since leaving last stop
-        </div>
-      )}
-    </div>
-  );
-}
 
 export function AdminApp() {
   const [event, setEvent] = useState<Event | null>(null);
@@ -630,25 +438,21 @@ export function AdminApp() {
   const currentStop = event.stops[event.currentStopIndex];
 
   // Determine what actions are available based on current state
-  let actionableStop = null;
   let canArrive = false;
   let canDepart = false;
 
   if (currentStop && currentStop.status === 'pending') {
     // Haven't started current stop yet - can arrive
-    actionableStop = currentStop;
     canArrive = true;
     canDepart = false;
   } else if (currentStop && currentStop.status === 'active') {
     // Currently at current stop - can depart
-    actionableStop = currentStop;
     canArrive = false;
     canDepart = true;
   } else if (currentStop && currentStop.status === 'completed') {
     // Already departed from current stop - can arrive at next stop
     const nextStop = event.stops[event.currentStopIndex + 1];
     if (nextStop && nextStop.status === 'pending') {
-      actionableStop = nextStop;
       canArrive = true;
       canDepart = false;
     }
