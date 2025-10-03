@@ -1,26 +1,106 @@
-import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, onValue, set, off } from 'firebase/database';
+// Firebase configuration with localStorage fallback
+// This file gracefully handles missing Firebase package or configuration
 
-// Firebase configuration
-// You need to replace these with your actual Firebase config
-// Get this from Firebase Console > Project Settings > General > Your apps
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "your-api-key",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "your-project.firebaseapp.com",
-  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || "https://your-project-default-rtdb.firebaseio.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "your-project",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "your-project.appspot.com",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "123456789",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:123456789:web:abcdef"
+// Storage keys for localStorage fallback
+const STORAGE_KEYS = {
+  EVENT: 'goatpath_event',
+  LAST_UPDATE: 'goatpath_last_update'
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
+// LocalStorage-based fallback implementations
+const localStorageOnValue = (ref: any, callback: (snapshot: any) => void, errorCallback?: (error: any) => void) => {
+  console.log('📦 Using localStorage fallback (Firebase not available)');
 
-// Event reference
-export const eventRef = ref(database, 'event');
+  // Initial load from localStorage
+  try {
+    const savedEvent = localStorage.getItem(STORAGE_KEYS.EVENT);
+    if (savedEvent) {
+      const data = JSON.parse(savedEvent);
+      callback({ val: () => data });
+    } else {
+      callback({ val: () => null });
+    }
+  } catch (error) {
+    console.error('Failed to load from localStorage:', error);
+    if (errorCallback) errorCallback(error);
+  }
 
-// Helper functions
-export { onValue, set, off };
-export { database };
+  // Poll for updates every 2 seconds
+  const interval = setInterval(() => {
+    try {
+      const savedEvent = localStorage.getItem(STORAGE_KEYS.EVENT);
+      if (savedEvent) {
+        const data = JSON.parse(savedEvent);
+        callback({ val: () => data });
+      }
+    } catch (error) {
+      console.error('Failed to poll localStorage:', error);
+    }
+  }, 2000);
+
+  // Return unsubscribe function
+  return () => clearInterval(interval);
+};
+
+const localStorageSet = async (ref: any, data: any) => {
+  console.log('💾 Writing to localStorage (Firebase not available)');
+  try {
+    localStorage.setItem(STORAGE_KEYS.EVENT, JSON.stringify(data));
+    localStorage.setItem(STORAGE_KEYS.LAST_UPDATE, data.updatedAt || new Date().toISOString());
+    return Promise.resolve();
+  } catch (error) {
+    console.error('Failed to write to localStorage:', error);
+    return Promise.reject(error);
+  }
+};
+
+const localStorageOff = () => {
+  // No-op for localStorage
+};
+
+// Check if Firebase is configured
+const apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
+const hasFirebaseConfig = apiKey && apiKey !== 'your-api-key' && !apiKey.includes('your-');
+
+// Initialize with fallbacks by default
+export let eventRef: any = null;
+export let database: any = null;
+export let firebaseEnabled = false;
+export let onValue = localStorageOnValue;
+export let set = localStorageSet;
+export let off = localStorageOff;
+
+// Only try to load Firebase if we have config
+if (hasFirebaseConfig) {
+  import('firebase/app')
+    .then((firebaseApp) => {
+      return import('firebase/database').then((firebaseDatabase) => {
+        const firebaseConfig = {
+          apiKey: import.meta.env.VITE_FIREBASE_API_KEY!,
+          authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN!,
+          databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL!,
+          projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID!,
+          storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET!,
+          messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID!,
+          appId: import.meta.env.VITE_FIREBASE_APP_ID!
+        };
+
+        const app = firebaseApp.initializeApp(firebaseConfig);
+        database = firebaseDatabase.getDatabase(app);
+        eventRef = firebaseDatabase.ref(database, 'event');
+        firebaseEnabled = true;
+        onValue = firebaseDatabase.onValue;
+        set = firebaseDatabase.set;
+        off = firebaseDatabase.off;
+
+        console.log('✅ Firebase initialized successfully - using real-time sync');
+      });
+    })
+    .catch((error) => {
+      console.warn('⚠️ Firebase package not installed - using localStorage fallback');
+      console.warn('💡 Run: npm install firebase');
+    });
+} else {
+  console.warn('⚠️ Firebase not configured - using localStorage fallback');
+  console.warn('💡 See FIREBASE_SETUP.md for setup instructions');
+}
