@@ -439,10 +439,12 @@ export function AdminApp() {
   const logout = async () => {
     try {
       // Try to sign out of Firebase Auth
-      const { getAuth, signOut } = await import('firebase/auth');
-      const auth = getAuth();
-      await signOut(auth);
-      console.log('✅ Signed out of Firebase');
+      const { signOut } = await import('firebase/auth');
+      
+      if (auth) {
+        await signOut(auth);
+        console.log('✅ Signed out of Firebase');
+      }
     } catch (error) {
       console.warn('⚠️ Firebase Auth not available, clearing local storage');
     }

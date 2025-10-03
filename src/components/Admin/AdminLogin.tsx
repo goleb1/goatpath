@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { auth } from '../../firebase';
 
 const ADMIN_PASSWORD = '2025';
 const ADMIN_EMAIL = 'jpgolebie@gmail.com'; // You can change this to match your Firebase user
@@ -17,15 +18,36 @@ export function AdminLogin({ onAuthenticated }: AdminLoginProps) {
   useEffect(() => {
     const checkFirebaseAuth = async () => {
       try {
-        const { getAuth, onAuthStateChanged } = await import('firebase/auth');
-        const auth = getAuth();
+        const { onAuthStateChanged } = await import('firebase/auth');
+        
+        if (auth) {
+          onAuthStateChanged(auth, (user) => {
+            if (user) {
+              console.log('✅ User already authenticated:', user.email);
+              onAuthenticated();
+            }
+          });
+        } else {
+          console.warn('⚠️ Firebase Auth not available, using local password');
+          // Fallback to local password check
+          const savedAuth = localStorage.getItem(AUTH_STORAGE_KEY);
+          if (savedAuth) {
+            try {
+              const authData = JSON.parse(savedAuth);
+              const authTime = new Date(authData.timestamp);
+              const now = new Date();
+              const hoursDiff = (now.getTime() - authTime.getTime()) / (1000 * 60 * 60);
 
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            console.log('✅ User already authenticated:', user.email);
-            onAuthenticated();
+              if (hoursDiff < 24) {
+                onAuthenticated();
+              } else {
+                localStorage.removeItem(AUTH_STORAGE_KEY);
+              }
+            } catch {
+              localStorage.removeItem(AUTH_STORAGE_KEY);
+            }
           }
-        });
+        }
       } catch (error) {
         console.warn('⚠️ Firebase Auth not available, using local password');
         // Fallback to local password check
@@ -59,12 +81,15 @@ export function AdminLogin({ onAuthenticated }: AdminLoginProps) {
 
     try {
       // Try Firebase Authentication first
-      const { getAuth, signInWithEmailAndPassword } = await import('firebase/auth');
-      const auth = getAuth();
-
-      await signInWithEmailAndPassword(auth, ADMIN_EMAIL, password);
-      console.log('✅ Authenticated with Firebase');
-      onAuthenticated();
+      const { signInWithEmailAndPassword } = await import('firebase/auth');
+      
+      if (auth) {
+        await signInWithEmailAndPassword(auth, ADMIN_EMAIL, password);
+        console.log('✅ Authenticated with Firebase');
+        onAuthenticated();
+      } else {
+        throw new Error('Firebase Auth not available');
+      }
     } catch (firebaseError: any) {
       console.warn('Firebase auth failed:', firebaseError.message);
 
