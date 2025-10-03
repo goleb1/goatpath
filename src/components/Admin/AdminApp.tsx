@@ -381,7 +381,18 @@ export function AdminApp() {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      // Try to sign out of Firebase Auth
+      const { getAuth, signOut } = await import('firebase/auth');
+      const auth = getAuth();
+      await signOut(auth);
+      console.log('✅ Signed out of Firebase');
+    } catch (error) {
+      console.warn('⚠️ Firebase Auth not available, clearing local storage');
+    }
+
+    // Also clear local storage fallback
     localStorage.removeItem('goatpath_admin_auth');
     window.location.href = '/admin'; // Redirect to admin login
   };

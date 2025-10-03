@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 const ADMIN_PASSWORD = '2025';
+const ADMIN_EMAIL = 'admin@goatpath.app'; // You can change this to match your Firebase user
 const AUTH_STORAGE_KEY = 'goatpath_admin_auth';
 
 interface AdminLoginProps {
@@ -10,46 +11,78 @@ interface AdminLoginProps {
 export function AdminLogin({ onAuthenticated }: AdminLoginProps) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
 
-  // Check for existing authentication on mount
+  // Check for existing Firebase authentication on mount
   useEffect(() => {
-    const savedAuth = localStorage.getItem(AUTH_STORAGE_KEY);
-    if (savedAuth) {
+    const checkFirebaseAuth = async () => {
       try {
-        const authData = JSON.parse(savedAuth);
-        // Check if auth is still valid (within 24 hours)
-        const authTime = new Date(authData.timestamp);
-        const now = new Date();
-        const hoursDiff = (now.getTime() - authTime.getTime()) / (1000 * 60 * 60);
+        const { getAuth, onAuthStateChanged } = await import('firebase/auth');
+        const auth = getAuth();
 
-        if (hoursDiff < 24) {
-          onAuthenticated();
-          return;
-        } else {
-          // Auth expired, remove it
-          localStorage.removeItem(AUTH_STORAGE_KEY);
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            console.log('✅ User already authenticated:', user.email);
+            onAuthenticated();
+          }
+        });
+      } catch (error) {
+        console.warn('⚠️ Firebase Auth not available, using local password');
+        // Fallback to local password check
+        const savedAuth = localStorage.getItem(AUTH_STORAGE_KEY);
+        if (savedAuth) {
+          try {
+            const authData = JSON.parse(savedAuth);
+            const authTime = new Date(authData.timestamp);
+            const now = new Date();
+            const hoursDiff = (now.getTime() - authTime.getTime()) / (1000 * 60 * 60);
+
+            if (hoursDiff < 24) {
+              onAuthenticated();
+            } else {
+              localStorage.removeItem(AUTH_STORAGE_KEY);
+            }
+          } catch {
+            localStorage.removeItem(AUTH_STORAGE_KEY);
+          }
         }
-      } catch {
-        // Invalid auth data, remove it
-        localStorage.removeItem(AUTH_STORAGE_KEY);
       }
-    }
+    };
+
+    checkFirebaseAuth();
   }, [onAuthenticated]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsAuthenticating(true);
+    setError('');
 
-    if (password === ADMIN_PASSWORD) {
-      // Save authentication with timestamp
-      const authData = {
-        authenticated: true,
-        timestamp: new Date().toISOString()
-      };
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
+    try {
+      // Try Firebase Authentication first
+      const { getAuth, signInWithEmailAndPassword } = await import('firebase/auth');
+      const auth = getAuth();
+
+      await signInWithEmailAndPassword(auth, ADMIN_EMAIL, password);
+      console.log('✅ Authenticated with Firebase');
       onAuthenticated();
-    } else {
-      setError('Invalid access code');
-      setPassword('');
+    } catch (firebaseError: any) {
+      console.warn('Firebase auth failed:', firebaseError.message);
+
+      // Fallback to local password check
+      if (password === ADMIN_PASSWORD) {
+        const authData = {
+          authenticated: true,
+          timestamp: new Date().toISOString()
+        };
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
+        console.log('✅ Authenticated with local password');
+        onAuthenticated();
+      } else {
+        setError('Invalid access code');
+        setPassword('');
+      }
+    } finally {
+      setIsAuthenticating(false);
     }
   };
 
@@ -243,20 +276,20 @@ export function AdminLogin({ onAuthenticated }: AdminLoginProps) {
 
             <button
               type="submit"
-              disabled={password.length !== 4}
+              disabled={password.length !== 4 || isAuthenticating}
               style={{
                 width: '100%',
                 padding: '0.75rem 1.5rem',
-                backgroundColor: password.length === 4 ? '#B1CDFF' : 'rgba(177, 205, 255, 0.3)',
-                color: password.length === 4 ? '#231F20' : 'rgba(35, 31, 32, 0.5)',
+                backgroundColor: (password.length === 4 && !isAuthenticating) ? '#B1CDFF' : 'rgba(177, 205, 255, 0.3)',
+                color: (password.length === 4 && !isAuthenticating) ? '#231F20' : 'rgba(35, 31, 32, 0.5)',
                 fontFamily: 'JetBrains Mono, monospace',
                 fontWeight: 'bold',
                 border: 'none',
-                cursor: password.length === 4 ? 'pointer' : 'not-allowed',
+                cursor: (password.length === 4 && !isAuthenticating) ? 'pointer' : 'not-allowed',
                 fontSize: '1rem'
               }}
             >
-              ENTER
+              {isAuthenticating ? 'AUTHENTICATING...' : 'ENTER'}
             </button>
           </form>
 
