@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 const ADMIN_PASSWORD = '2025';
-const ADMIN_EMAIL = 'admin@goatpath.app'; // You can change this to match your Firebase user
+const ADMIN_EMAIL = 'jpgolebie@gmail.com'; // You can change this to match your Firebase user
 const AUTH_STORAGE_KEY = 'goatpath_admin_auth';
 
 interface AdminLoginProps {
