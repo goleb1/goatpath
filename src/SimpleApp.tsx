@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { SubwayProgressBar } from './components/Progress/SubwayProgressBar';
-import { eventRef, onValue, off } from './firebase';
+import { eventRef, onValue } from './firebase';
 
 // All types defined in one place
 interface Stop {

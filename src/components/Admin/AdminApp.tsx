@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { leTour2025 } from '../../data/letour2025';
-import { eventRef, onValue, set, off } from '../../firebase';
+import { eventRef, onValue, set } from '../../firebase';
 
 // Types
 interface Stop {
