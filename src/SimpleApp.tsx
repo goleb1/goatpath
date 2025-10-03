@@ -225,7 +225,6 @@ function SimpleApp() {
     // Cleanup subscription on unmount
     return () => {
       console.log('Unsubscribing from Firebase');
-      off(eventRef);
       unsubscribe();
     };
   }, []);

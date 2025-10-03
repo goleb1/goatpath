@@ -8,7 +8,7 @@ const STORAGE_KEYS = {
 };
 
 // LocalStorage-based fallback implementations
-const localStorageOnValue = (ref: any, callback: (snapshot: any) => void, errorCallback?: (error: any) => void) => {
+const localStorageOnValue = (_ref: any, callback: (snapshot: any) => void, errorCallback?: (error: any) => void) => {
   console.log('📦 Using localStorage fallback (Firebase not available)');
 
   // Initial load from localStorage
@@ -42,7 +42,7 @@ const localStorageOnValue = (ref: any, callback: (snapshot: any) => void, errorC
   return () => clearInterval(interval);
 };
 
-const localStorageSet = async (ref: any, data: any) => {
+const localStorageSet = async (_ref: any, data: any) => {
   console.log('💾 Writing to localStorage (Firebase not available)');
   try {
     localStorage.setItem(STORAGE_KEYS.EVENT, JSON.stringify(data));
@@ -54,7 +54,7 @@ const localStorageSet = async (ref: any, data: any) => {
   }
 };
 
-const localStorageOff = () => {
+const localStorageOff = (_ref?: any) => {
   // No-op for localStorage
 };
 
@@ -96,7 +96,7 @@ if (hasFirebaseConfig) {
         console.log('✅ Firebase initialized successfully - using real-time sync');
       });
     })
-    .catch((error) => {
+    .catch(() => {
       console.warn('⚠️ Firebase package not installed - using localStorage fallback');
       console.warn('💡 Run: npm install firebase');
     });

@@ -292,7 +292,6 @@ export function AdminApp() {
     // Cleanup subscription on unmount
     return () => {
       console.log('[Admin] Unsubscribing from Firebase');
-      off(eventRef);
       unsubscribe();
     };
   }, []);
