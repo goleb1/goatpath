@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { leTour2025 } from '../../data/letour2025';
+import { eventRef, onValue, set, off } from '../../firebase';
 
 // Types
 interface Stop {
@@ -27,13 +28,6 @@ interface Event {
   currentStopIndex: number;
   customMessage?: string;
 }
-
-// Storage keys
-const STORAGE_KEYS = {
-  EVENT: 'goatpath_event',
-  LAST_UPDATE: 'goatpath_last_update'
-};
-
 
 // Visual Timer Dots Component for Admin
 function VisualTimerDots({ stop, isActive, isRunning }: { stop: Stop; isActive: boolean; isRunning: boolean }) {
@@ -268,60 +262,40 @@ export function AdminApp() {
   const [customMessage, setCustomMessage] = useState('');
   const [showMessageInput, setShowMessageInput] = useState(false);
 
-  // Load event from localStorage on mount
+  // Subscribe to Firebase real-time updates
   useEffect(() => {
-    const savedEvent = localStorage.getItem(STORAGE_KEYS.EVENT);
-    if (savedEvent) {
-      try {
-        const parsedEvent = JSON.parse(savedEvent);
-        // Validate that the parsed event has the required structure
-        if (parsedEvent && parsedEvent.id && parsedEvent.stops && Array.isArray(parsedEvent.stops)) {
-          setEvent(parsedEvent);
-          return;
-        }
-      } catch (error) {
-        console.error('Failed to parse saved event:', error);
+    console.log('[Admin] Subscribing to Firebase event updates...');
+
+    const unsubscribe = onValue(eventRef, (snapshot) => {
+      const data = snapshot.val();
+      console.log('[Admin] Firebase event update received:', data);
+
+      if (data && data.id && data.stops && Array.isArray(data.stops)) {
+        setEvent(data);
+      } else if (!data) {
+        // If no data exists in Firebase, initialize with default
+        console.log('[Admin] No event data in Firebase, initializing with default');
+        const defaultEvent = { ...leTour2025 };
+        // Write the default to Firebase so it syncs to all clients
+        set(eventRef, defaultEvent).catch((error) => {
+          console.error('[Admin] Failed to initialize Firebase with default event:', error);
+        });
+        setEvent(defaultEvent);
       }
-    }
+    }, (error) => {
+      console.error('[Admin] Firebase subscription error:', error);
+      // Fallback to default event on error
+      const defaultEvent = { ...leTour2025 };
+      setEvent(defaultEvent);
+    });
 
-    // Only initialize with default if no valid saved event exists
-    const defaultEvent = { ...leTour2025 };
-    localStorage.setItem(STORAGE_KEYS.EVENT, JSON.stringify(defaultEvent));
-    setEvent(defaultEvent);
-  }, []);
-
-  // Poll for updates every 2 seconds
-  useEffect(() => {
-    const pollForUpdates = () => {
-      const savedEvent = localStorage.getItem(STORAGE_KEYS.EVENT);
-
-      if (savedEvent) {
-        try {
-          const parsedEvent = JSON.parse(savedEvent);
-          const currentLastUpdate = event?.updatedAt;
-
-          // Only update if the saved event is newer
-          if (parsedEvent.updatedAt !== currentLastUpdate) {
-            setEvent(parsedEvent);
-          }
-        } catch (error) {
-          console.error('Failed to parse event during polling:', error);
-        }
-      }
+    // Cleanup subscription on unmount
+    return () => {
+      console.log('[Admin] Unsubscribing from Firebase');
+      off(eventRef);
+      unsubscribe();
     };
-
-    const interval = setInterval(pollForUpdates, 2000); // Poll every 2 seconds
-    return () => clearInterval(interval);
-  }, [event?.updatedAt]);
-
-  // Save event to localStorage whenever it changes (but don't save if we're still loading)
-  useEffect(() => {
-    if (event && event.id) {
-      console.log('Saving event to localStorage:', event);
-      localStorage.setItem(STORAGE_KEYS.EVENT, JSON.stringify(event));
-      localStorage.setItem(STORAGE_KEYS.LAST_UPDATE, event.updatedAt);
-    }
-  }, [event]);
+  }, []);
 
   const updateStopStatus = (stopId: string, status: Stop['status']) => {
     if (!event) return;
@@ -366,18 +340,28 @@ export function AdminApp() {
       }
     }
 
-    setEvent({
+    const updatedEvent = {
       ...event,
       stops: updatedStops,
       currentStopIndex: newCurrentStopIndex,
       updatedAt: timestamp
+    };
+
+    // Write to Firebase (will sync to all clients)
+    console.log('[Admin] Writing event update to Firebase:', updatedEvent);
+    set(eventRef, updatedEvent).catch((error) => {
+      console.error('[Admin] Failed to write event to Firebase:', error);
     });
   };
 
   const undoLastAction = () => {
     if (!lastAction) return;
 
-    setEvent(lastAction.previousState);
+    // Write the previous state to Firebase
+    console.log('[Admin] Undoing action, writing previous state to Firebase');
+    set(eventRef, lastAction.previousState).catch((error) => {
+      console.error('[Admin] Failed to undo action in Firebase:', error);
+    });
     setLastAction(null); // Clear the undo after using it
   };
 
@@ -385,11 +369,13 @@ export function AdminApp() {
     if (window.confirm('Reset entire event? This will clear all progress.')) {
       // Create a fresh copy of the default event
       const resetEvent = { ...leTour2025 };
-      // Clear any existing localStorage data
-      localStorage.removeItem(STORAGE_KEYS.EVENT);
-      localStorage.removeItem(STORAGE_KEYS.LAST_UPDATE);
-      // Set the fresh event (this will trigger the save effect)
-      setEvent(resetEvent);
+
+      // Write the reset event to Firebase
+      console.log('[Admin] Resetting event, writing default to Firebase');
+      set(eventRef, resetEvent).catch((error) => {
+        console.error('[Admin] Failed to reset event in Firebase:', error);
+      });
+
       // Clear the last action for undo
       setLastAction(null);
     }
@@ -409,7 +395,12 @@ export function AdminApp() {
       updatedAt: new Date().toISOString()
     };
 
-    setEvent(updatedEvent);
+    // Write to Firebase
+    console.log('[Admin] Setting custom message in Firebase');
+    set(eventRef, updatedEvent).catch((error) => {
+      console.error('[Admin] Failed to set custom message in Firebase:', error);
+    });
+
     setCustomMessage('');
     setShowMessageInput(false);
   };
@@ -423,7 +414,11 @@ export function AdminApp() {
       updatedAt: new Date().toISOString()
     };
 
-    setEvent(updatedEvent);
+    // Write to Firebase
+    console.log('[Admin] Clearing custom message in Firebase');
+    set(eventRef, updatedEvent).catch((error) => {
+      console.error('[Admin] Failed to clear custom message in Firebase:', error);
+    });
   };
 
   const toggleMessageInput = () => {

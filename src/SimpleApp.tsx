@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { SubwayProgressBar } from './components/Progress/SubwayProgressBar';
+import { eventRef, onValue, off } from './firebase';
 
 // All types defined in one place
 interface Stop {
@@ -193,71 +194,41 @@ function RouteCardTimer({ event, stop, index }: { event: Event; stop: Stop; inde
   );
 }
 
-// Storage keys
-const STORAGE_KEYS = {
-  EVENT: 'goatpath_event',
-  LAST_UPDATE: 'goatpath_last_update'
-};
-
 // Main App Component
 function SimpleApp() {
   const [event, setEvent] = useState<Event | null>(null);
   const routeListRef = useRef<HTMLDivElement>(null);
 
-  // Load event from localStorage on mount
+  // Subscribe to Firebase real-time updates
   useEffect(() => {
-    const savedEvent = localStorage.getItem(STORAGE_KEYS.EVENT);
-    if (savedEvent) {
-      try {
-        const parsedEvent = JSON.parse(savedEvent);
-        // Validate that the parsed event has the required structure
-        if (parsedEvent && parsedEvent.id && parsedEvent.stops && Array.isArray(parsedEvent.stops)) {
-          setEvent(parsedEvent);
-          return;
-        }
-      } catch (error) {
-        console.error('Failed to parse saved event:', error);
+    console.log('Subscribing to Firebase event updates...');
+
+    const unsubscribe = onValue(eventRef, (snapshot) => {
+      const data = snapshot.val();
+      console.log('Firebase event update received:', data);
+
+      if (data && data.id && data.stops && Array.isArray(data.stops)) {
+        setEvent(data);
+      } else if (!data) {
+        // If no data exists in Firebase, initialize with default
+        console.log('No event data in Firebase, using default');
+        const defaultEvent = { ...leTour2025 };
+        setEvent(defaultEvent);
       }
-    }
-    
-    // Only initialize with default if no valid saved event exists
-    const defaultEvent = { ...leTour2025 };
-    localStorage.setItem(STORAGE_KEYS.EVENT, JSON.stringify(defaultEvent));
-    setEvent(defaultEvent);
-  }, []);
+    }, (error) => {
+      console.error('Firebase subscription error:', error);
+      // Fallback to default event on error
+      const defaultEvent = { ...leTour2025 };
+      setEvent(defaultEvent);
+    });
 
-  // Poll for updates every 2 seconds
-  useEffect(() => {
-    const pollForUpdates = () => {
-      const savedEvent = localStorage.getItem(STORAGE_KEYS.EVENT);
-
-      if (savedEvent) {
-        try {
-          const parsedEvent = JSON.parse(savedEvent);
-          const currentLastUpdate = event?.updatedAt;
-
-          // Only update if the saved event is newer
-          if (parsedEvent.updatedAt !== currentLastUpdate) {
-            setEvent(parsedEvent);
-          }
-        } catch (error) {
-          console.error('Failed to parse event during polling:', error);
-        }
-      }
+    // Cleanup subscription on unmount
+    return () => {
+      console.log('Unsubscribing from Firebase');
+      off(eventRef);
+      unsubscribe();
     };
-
-    const interval = setInterval(pollForUpdates, 2000); // Poll every 2 seconds
-    return () => clearInterval(interval);
-  }, [event?.updatedAt]);
-
-  // Save event to localStorage whenever it changes (but don't save if we're still loading)
-  useEffect(() => {
-    if (event && event.id) {
-      console.log('Saving event to localStorage:', event);
-      localStorage.setItem(STORAGE_KEYS.EVENT, JSON.stringify(event));
-      localStorage.setItem(STORAGE_KEYS.LAST_UPDATE, event.updatedAt);
-    }
-  }, [event]);
+  }, []);
 
   // Function to get the appropriate goat logo based on progress
   const getGoatLogo = () => {
