@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firebase Config Test</title>
+    <style>
+        body { font-family: monospace; margin: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>Firebase Configuration Test</h1>
+    <div id="results"></div>
+
+    <script type="module">
+        function addResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = message;
+            resultsDiv.appendChild(div);
+        }
+
+        // Test environment variables (these would be available in your actual app)
+        addResult('Testing Firebase configuration...', 'info');
+        
+        // Check if we can access environment variables
+        try {
+            // In a real app, these would come from import.meta.env
+            const config = {
+                apiKey: 'AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', // Replace with your actual key
+                authDomain: 'goatpath-9e006.firebaseapp.com', // Replace with your actual domain
+                databaseURL: 'https://goatpath-9e006-default-rtdb.firebaseio.com', // Replace with your actual URL
+                projectId: 'goatpath-9e006', // Replace with your actual project ID
+                storageBucket: 'goatpath-9e006.appspot.com', // Replace with your actual bucket
+                messagingSenderId: '123758845491', // Replace with your actual sender ID
+                appId: '1:123758845491:web:9fff948b4b7d76046bcd46' // Replace with your actual app ID
+            };
+            
+            addResult('Configuration loaded:', 'info');
+            Object.keys(config).forEach(key => {
+                addResult(`${key}: ${config[key].substring(0, 20)}...`, 'info');
+            });
+            
+            // Test Firebase initialization
+            import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js').then(firebaseApp => {
+                import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js').then(firebaseAuth => {
+                    import('https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js').then(firebaseDatabase => {
+                        try {
+                            const app = firebaseApp.initializeApp(config);
+                            const auth = firebaseAuth.getAuth(app);
+                            const database = firebaseDatabase.getDatabase(app);
+                            
+                            addResult('✅ Firebase initialized successfully!', 'success');
+                            addResult('✅ Auth instance created!', 'success');
+                            addResult('✅ Database instance created!', 'success');
+                            
+                            // Test auth state
+                            firebaseAuth.onAuthStateChanged(auth, (user) => {
+                                if (user) {
+                                    addResult(`✅ User authenticated: ${user.email}`, 'success');
+                                } else {
+                                    addResult('⚠️ No user authenticated', 'warning');
+                                }
+                            });
+                            
+                        } catch (error) {
+                            addResult(`❌ Firebase initialization failed: ${error.message}`, 'error');
+                        }
+                    });
+                });
+            });
+            
+        } catch (error) {
+            addResult(`❌ Configuration test failed: ${error.message}`, 'error');
+        }
+    </script>
+</body>
+</html>

@@ -85,9 +85,13 @@ export function AdminLogin({ onAuthenticated }: AdminLoginProps) {
       const { signInWithEmailAndPassword } = await import('firebase/auth');
       
       const auth = getAuth();
+      console.log('[Login] Auth instance:', auth);
+      console.log('[Login] Attempting to sign in with:', ADMIN_EMAIL);
+      
       if (auth) {
         await signInWithEmailAndPassword(auth, ADMIN_EMAIL, password);
         console.log('✅ Authenticated with Firebase');
+        console.log('[Login] Current user after sign in:', auth.currentUser);
         onAuthenticated();
       } else {
         throw new Error('Firebase Auth not available');

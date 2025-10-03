@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firebase Auth Debug</title>
+    <style>
+        body { font-family: monospace; margin: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        input { padding: 5px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Firebase Authentication Debug Tool</h1>
+    
+    <div id="status" class="status info">Initializing...</div>
+    
+    <div id="auth-section">
+        <h2>Authentication Test</h2>
+        <input type="email" id="email" placeholder="Admin Email" value="jpgolebie@gmail.com">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="testLogin()">Test Login</button>
+        <button onclick="testLogout()">Test Logout</button>
+        <div id="auth-result"></div>
+    </div>
+    
+    <div id="database-section">
+        <h2>Database Test</h2>
+        <button onclick="testDatabaseRead()">Test Database Read</button>
+        <button onclick="testDatabaseWrite()">Test Database Write</button>
+        <div id="database-result"></div>
+    </div>
+    
+    <div id="rules-section">
+        <h2>Rules Test</h2>
+        <button onclick="testRules()">Test Current Rules</button>
+        <div id="rules-result"></div>
+    </div>
+
+    <script type="module">
+        // Import Firebase
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getDatabase, ref, set, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        // Your Firebase config - REPLACE WITH YOUR ACTUAL VALUES
+        const firebaseConfig = {
+            apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", // Replace with your actual API key
+            authDomain: "goatpath-9e006.firebaseapp.com", // Replace with your actual domain
+            databaseURL: "https://goatpath-9e006-default-rtdb.firebaseio.com", // Replace with your actual database URL
+            projectId: "goatpath-9e006", // Replace with your actual project ID
+            storageBucket: "goatpath-9e006.appspot.com", // Replace with your actual storage bucket
+            messagingSenderId: "123758845491", // Replace with your actual sender ID
+            appId: "1:123758845491:web:9fff948b4b7d76046bcd46" // Replace with your actual app ID
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        // Status updates
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+
+        function updateResult(elementId, message, type = 'info') {
+            const resultDiv = document.getElementById(elementId);
+            resultDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        // Auth state listener
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                updateStatus(`✅ User authenticated: ${user.email}`, 'success');
+            } else {
+                updateStatus('❌ User not authenticated', 'error');
+            }
+        });
+
+        // Test login
+        window.testLogin = async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                updateResult('auth-result', 'Attempting login...', 'info');
+                await signInWithEmailAndPassword(auth, email, password);
+                updateResult('auth-result', '✅ Login successful!', 'success');
+            } catch (error) {
+                updateResult('auth-result', `❌ Login failed: ${error.message}`, 'error');
+            }
+        };
+
+        // Test logout
+        window.testLogout = async () => {
+            try {
+                await signOut(auth);
+                updateResult('auth-result', '✅ Logout successful!', 'success');
+            } catch (error) {
+                updateResult('auth-result', `❌ Logout failed: ${error.message}`, 'error');
+            }
+        };
+
+        // Test database read
+        window.testDatabaseRead = async () => {
+            try {
+                updateResult('database-result', 'Testing database read...', 'info');
+                const eventRef = ref(database, 'event');
+                const snapshot = await get(eventRef);
+                if (snapshot.exists()) {
+                    updateResult('database-result', '✅ Database read successful!', 'success');
+                } else {
+                    updateResult('database-result', '⚠️ Database read successful but no data found', 'warning');
+                }
+            } catch (error) {
+                updateResult('database-result', `❌ Database read failed: ${error.message}`, 'error');
+            }
+        };
+
+        // Test database write
+        window.testDatabaseWrite = async () => {
+            try {
+                updateResult('database-result', 'Testing database write...', 'info');
+                const testRef = ref(database, 'event/test');
+                await set(testRef, {
+                    test: true,
+                    timestamp: new Date().toISOString(),
+                    user: auth.currentUser?.email || 'unknown'
+                });
+                updateResult('database-result', '✅ Database write successful!', 'success');
+            } catch (error) {
+                updateResult('database-result', `❌ Database write failed: ${error.message}`, 'error');
+            }
+        };
+
+        // Test rules
+        window.testRules = async () => {
+            try {
+                updateResult('rules-result', 'Testing current rules...', 'info');
+                
+                // Test read access
+                const eventRef = ref(database, 'event');
+                const snapshot = await get(eventRef);
+                const readSuccess = snapshot.exists();
+                
+                // Test write access
+                const testRef = ref(database, 'event/rules-test');
+                await set(testRef, { test: true });
+                const writeSuccess = true;
+                
+                updateResult('rules-result', 
+                    `✅ Rules test results:<br>
+                    Read access: ${readSuccess ? '✅ Allowed' : '❌ Denied'}<br>
+                    Write access: ${writeSuccess ? '✅ Allowed' : '❌ Denied'}`, 
+                    'success'
+                );
+            } catch (error) {
+                updateResult('rules-result', `❌ Rules test failed: ${error.message}`, 'error');
+            }
+        };
+
+        // Initialize
+        updateStatus('Firebase initialized. Ready for testing.', 'info');
+    </script>
+</body>
+</html>

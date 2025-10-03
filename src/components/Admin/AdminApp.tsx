@@ -365,6 +365,10 @@ export function AdminApp() {
     
     // Check if user is authenticated before writing
     const auth = getAuth();
+    console.log('[Admin] Auth instance:', auth);
+    console.log('[Admin] Auth currentUser:', auth?.currentUser);
+    console.log('[Admin] Auth currentUser email:', auth?.currentUser?.email);
+    
     if (auth && auth.currentUser) {
       console.log('[Admin] User authenticated, writing to Firebase:', auth.currentUser.email);
       set(eventRef, updatedEvent).catch((error) => {
@@ -372,6 +376,8 @@ export function AdminApp() {
       });
     } else {
       console.warn('[Admin] User not authenticated, cannot write to Firebase');
+      console.warn('[Admin] Auth available:', !!auth);
+      console.warn('[Admin] Current user:', auth?.currentUser);
       // Fallback to localStorage for development
       try {
         localStorage.setItem('goatpath_event', JSON.stringify(updatedEvent));
