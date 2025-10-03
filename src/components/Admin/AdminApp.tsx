@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { leTour2025 } from '../../data/letour2025';
-import { eventRef, onValue, set } from '../../firebase';
+import { eventRef, onValue, set, auth } from '../../firebase';
 
 // Types
 interface Stop {
@@ -277,9 +277,22 @@ export function AdminApp() {
         console.log('[Admin] No event data in Firebase, initializing with default');
         const defaultEvent = { ...leTour2025 };
         // Write the default to Firebase so it syncs to all clients
-        set(eventRef, defaultEvent).catch((error) => {
-          console.error('[Admin] Failed to initialize Firebase with default event:', error);
-        });
+        if (auth && auth.currentUser) {
+          console.log('[Admin] User authenticated, initializing Firebase with default event');
+          set(eventRef, defaultEvent).catch((error) => {
+            console.error('[Admin] Failed to initialize Firebase with default event:', error);
+          });
+        } else {
+          console.warn('[Admin] User not authenticated, cannot initialize Firebase');
+          // Fallback to localStorage
+          try {
+            localStorage.setItem('goatpath_event', JSON.stringify(defaultEvent));
+            localStorage.setItem('goatpath_last_update', defaultEvent.updatedAt);
+            console.log('[Admin] Fallback: Initialized with localStorage');
+          } catch (error) {
+            console.error('[Admin] Failed to initialize localStorage:', error);
+          }
+        }
         setEvent(defaultEvent);
       }
     }, (error) => {
@@ -348,9 +361,24 @@ export function AdminApp() {
 
     // Write to Firebase (will sync to all clients)
     console.log('[Admin] Writing event update to Firebase:', updatedEvent);
-    set(eventRef, updatedEvent).catch((error) => {
-      console.error('[Admin] Failed to write event to Firebase:', error);
-    });
+    
+    // Check if user is authenticated before writing
+    if (auth && auth.currentUser) {
+      console.log('[Admin] User authenticated, writing to Firebase:', auth.currentUser.email);
+      set(eventRef, updatedEvent).catch((error) => {
+        console.error('[Admin] Failed to write event to Firebase:', error);
+      });
+    } else {
+      console.warn('[Admin] User not authenticated, cannot write to Firebase');
+      // Fallback to localStorage for development
+      try {
+        localStorage.setItem('goatpath_event', JSON.stringify(updatedEvent));
+        localStorage.setItem('goatpath_last_update', updatedEvent.updatedAt);
+        console.log('[Admin] Fallback: Saved to localStorage');
+      } catch (error) {
+        console.error('[Admin] Failed to save to localStorage:', error);
+      }
+    }
   };
 
   const undoLastAction = () => {
@@ -358,9 +386,23 @@ export function AdminApp() {
 
     // Write the previous state to Firebase
     console.log('[Admin] Undoing action, writing previous state to Firebase');
-    set(eventRef, lastAction.previousState).catch((error) => {
-      console.error('[Admin] Failed to undo action in Firebase:', error);
-    });
+    
+    if (auth && auth.currentUser) {
+      console.log('[Admin] User authenticated, undoing action in Firebase');
+      set(eventRef, lastAction.previousState).catch((error) => {
+        console.error('[Admin] Failed to undo action in Firebase:', error);
+      });
+    } else {
+      console.warn('[Admin] User not authenticated, cannot undo in Firebase');
+      // Fallback to localStorage
+      try {
+        localStorage.setItem('goatpath_event', JSON.stringify(lastAction.previousState));
+        localStorage.setItem('goatpath_last_update', lastAction.previousState.updatedAt);
+        console.log('[Admin] Fallback: Undone in localStorage');
+      } catch (error) {
+        console.error('[Admin] Failed to undo in localStorage:', error);
+      }
+    }
     setLastAction(null); // Clear the undo after using it
   };
 
@@ -371,9 +413,23 @@ export function AdminApp() {
 
       // Write the reset event to Firebase
       console.log('[Admin] Resetting event, writing default to Firebase');
-      set(eventRef, resetEvent).catch((error) => {
-        console.error('[Admin] Failed to reset event in Firebase:', error);
-      });
+      
+      if (auth && auth.currentUser) {
+        console.log('[Admin] User authenticated, resetting event in Firebase');
+        set(eventRef, resetEvent).catch((error) => {
+          console.error('[Admin] Failed to reset event in Firebase:', error);
+        });
+      } else {
+        console.warn('[Admin] User not authenticated, cannot reset in Firebase');
+        // Fallback to localStorage
+        try {
+          localStorage.setItem('goatpath_event', JSON.stringify(resetEvent));
+          localStorage.setItem('goatpath_last_update', resetEvent.updatedAt);
+          console.log('[Admin] Fallback: Reset in localStorage');
+        } catch (error) {
+          console.error('[Admin] Failed to reset in localStorage:', error);
+        }
+      }
 
       // Clear the last action for undo
       setLastAction(null);
@@ -407,9 +463,23 @@ export function AdminApp() {
 
     // Write to Firebase
     console.log('[Admin] Setting custom message in Firebase');
-    set(eventRef, updatedEvent).catch((error) => {
-      console.error('[Admin] Failed to set custom message in Firebase:', error);
-    });
+    
+    if (auth && auth.currentUser) {
+      console.log('[Admin] User authenticated, setting custom message in Firebase');
+      set(eventRef, updatedEvent).catch((error) => {
+        console.error('[Admin] Failed to set custom message in Firebase:', error);
+      });
+    } else {
+      console.warn('[Admin] User not authenticated, cannot set custom message in Firebase');
+      // Fallback to localStorage
+      try {
+        localStorage.setItem('goatpath_event', JSON.stringify(updatedEvent));
+        localStorage.setItem('goatpath_last_update', updatedEvent.updatedAt);
+        console.log('[Admin] Fallback: Custom message saved to localStorage');
+      } catch (error) {
+        console.error('[Admin] Failed to save custom message to localStorage:', error);
+      }
+    }
 
     setCustomMessage('');
     setShowMessageInput(false);
@@ -426,9 +496,23 @@ export function AdminApp() {
 
     // Write to Firebase
     console.log('[Admin] Clearing custom message in Firebase');
-    set(eventRef, updatedEvent).catch((error) => {
-      console.error('[Admin] Failed to clear custom message in Firebase:', error);
-    });
+    
+    if (auth && auth.currentUser) {
+      console.log('[Admin] User authenticated, clearing custom message in Firebase');
+      set(eventRef, updatedEvent).catch((error) => {
+        console.error('[Admin] Failed to clear custom message in Firebase:', error);
+      });
+    } else {
+      console.warn('[Admin] User not authenticated, cannot clear custom message in Firebase');
+      // Fallback to localStorage
+      try {
+        localStorage.setItem('goatpath_event', JSON.stringify(updatedEvent));
+        localStorage.setItem('goatpath_last_update', updatedEvent.updatedAt);
+        console.log('[Admin] Fallback: Custom message cleared in localStorage');
+      } catch (error) {
+        console.error('[Admin] Failed to clear custom message in localStorage:', error);
+      }
+    }
   };
 
   const toggleMessageInput = () => {

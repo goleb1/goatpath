@@ -7,6 +7,9 @@ const STORAGE_KEYS = {
   LAST_UPDATE: 'goatpath_last_update'
 };
 
+// Firebase Auth context
+let auth: any = null;
+
 // LocalStorage-based fallback implementations
 const localStorageOnValue = (_ref: any, callback: (snapshot: any) => void, errorCallback?: (error: any) => void) => {
   console.log('📦 Using localStorage fallback (Firebase not available)');
@@ -70,11 +73,17 @@ export let onValue = localStorageOnValue;
 export let set = localStorageSet;
 export let off = localStorageOff;
 
+// Export auth for use in components
+export { auth };
+
 // Only try to load Firebase if we have config
 if (hasFirebaseConfig) {
   import('firebase/app')
     .then((firebaseApp) => {
-      return import('firebase/database').then((firebaseDatabase) => {
+      return Promise.all([
+        import('firebase/database'),
+        import('firebase/auth')
+      ]).then(([firebaseDatabase, firebaseAuth]) => {
         const firebaseConfig = {
           apiKey: import.meta.env.VITE_FIREBASE_API_KEY!,
           authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN!,
@@ -87,13 +96,14 @@ if (hasFirebaseConfig) {
 
         const app = firebaseApp.initializeApp(firebaseConfig);
         database = firebaseDatabase.getDatabase(app);
+        auth = firebaseAuth.getAuth(app);
         eventRef = firebaseDatabase.ref(database, 'event');
         firebaseEnabled = true;
         onValue = firebaseDatabase.onValue;
         set = firebaseDatabase.set;
         off = firebaseDatabase.off;
 
-        console.log('✅ Firebase initialized successfully - using real-time sync');
+        console.log('✅ Firebase initialized successfully - using real-time sync with auth');
       });
     })
     .catch(() => {
