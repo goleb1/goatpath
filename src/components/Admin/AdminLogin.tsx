@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { auth } from '../../firebase';
+import { getAuth } from '../../firebase';
 
 const ADMIN_PASSWORD = '2025';
 const ADMIN_EMAIL = 'jpgolebie@gmail.com'; // You can change this to match your Firebase user
@@ -20,6 +20,7 @@ export function AdminLogin({ onAuthenticated }: AdminLoginProps) {
       try {
         const { onAuthStateChanged } = await import('firebase/auth');
         
+        const auth = getAuth();
         if (auth) {
           onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -83,6 +84,7 @@ export function AdminLogin({ onAuthenticated }: AdminLoginProps) {
       // Try Firebase Authentication first
       const { signInWithEmailAndPassword } = await import('firebase/auth');
       
+      const auth = getAuth();
       if (auth) {
         await signInWithEmailAndPassword(auth, ADMIN_EMAIL, password);
         console.log('✅ Authenticated with Firebase');

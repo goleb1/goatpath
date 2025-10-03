@@ -1,4 +1,28 @@
-# Firebase Security Rules Setup
+index-BiotlZGN.js:409 [2025-10-03T18:38:09.668Z]  @firebase/database: FIREBASE WARNING: set at /event failed: permission_denied 
+kS @ index-BiotlZGN.js:409
+warn @ index-BiotlZGN.js:409
+St @ index-BiotlZGN.js:649
+(anonymous) @ index-BiotlZGN.js:1597
+(anonymous) @ index-BiotlZGN.js:904
+onDataMessage_ @ index-BiotlZGN.js:904
+onDataMessage_ @ index-BiotlZGN.js:814
+onPrimaryMessageReceived_ @ index-BiotlZGN.js:814
+(anonymous) @ index-BiotlZGN.js:814
+appendFrame_ @ index-BiotlZGN.js:784
+handleIncomingFrame @ index-BiotlZGN.js:784
+mySock.onmessage @ index-BiotlZGN.js:784
+index-BiotlZGN.js:1692 [Admin] Firebase event update received: {adminPassword: 'admin2025', createdAt: '2024-12-01T00:00:00Z', currentStopIndex: 0, date: '2025-10-04', id: 'letour2025', …}
+index-BiotlZGN.js:1692 [Admin] Failed to write event to Firebase: Error: PERMISSION_DENIED: Permission denied
+    at index-BiotlZGN.js:1597:3845
+    at Bl (index-BiotlZGN.js:649:3844)
+    at BA (index-BiotlZGN.js:1597:3746)
+    at index-BiotlZGN.js:1597:2945
+    at index-BiotlZGN.js:904:6306
+    at Cn.onDataMessage_ (index-BiotlZGN.js:904:6638)
+    at IC.onDataMessage_ (index-BiotlZGN.js:814:3645)
+    at IC.onPrimaryMessageReceived_ (index-BiotlZGN.js:814:3578)
+    at Vt.onMessage (index-BiotlZGN.js:814:1921)
+    at Vt.appendFrame_ (index-BiotlZGN.js:784:1945)# Firebase Security Rules Setup
 
 ## The Problem
 You're getting `PERMISSION_DENIED` errors when trying to write to Firebase from the admin portal. This is because your Firebase Realtime Database security rules are not properly configured for authenticated users.

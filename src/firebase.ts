@@ -10,6 +10,9 @@ const STORAGE_KEYS = {
 // Firebase Auth context
 let auth: any = null;
 
+// Auth getter function
+export const getAuth = () => auth;
+
 // LocalStorage-based fallback implementations
 const localStorageOnValue = (_ref: any, callback: (snapshot: any) => void, errorCallback?: (error: any) => void) => {
   console.log('📦 Using localStorage fallback (Firebase not available)');
@@ -73,8 +76,7 @@ export let onValue = localStorageOnValue;
 export let set = localStorageSet;
 export let off = localStorageOff;
 
-// Export auth for use in components
-export { auth };
+// Auth is available via getAuth() function
 
 // Only try to load Firebase if we have config
 if (hasFirebaseConfig) {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { leTour2025 } from '../../data/letour2025';
-import { eventRef, onValue, set, auth } from '../../firebase';
+import { eventRef, onValue, set, getAuth } from '../../firebase';
 
 // Types
 interface Stop {
@@ -277,6 +277,7 @@ export function AdminApp() {
         console.log('[Admin] No event data in Firebase, initializing with default');
         const defaultEvent = { ...leTour2025 };
         // Write the default to Firebase so it syncs to all clients
+        const auth = getAuth();
         if (auth && auth.currentUser) {
           console.log('[Admin] User authenticated, initializing Firebase with default event');
           set(eventRef, defaultEvent).catch((error) => {
@@ -363,6 +364,7 @@ export function AdminApp() {
     console.log('[Admin] Writing event update to Firebase:', updatedEvent);
     
     // Check if user is authenticated before writing
+    const auth = getAuth();
     if (auth && auth.currentUser) {
       console.log('[Admin] User authenticated, writing to Firebase:', auth.currentUser.email);
       set(eventRef, updatedEvent).catch((error) => {
@@ -387,6 +389,7 @@ export function AdminApp() {
     // Write the previous state to Firebase
     console.log('[Admin] Undoing action, writing previous state to Firebase');
     
+    const auth = getAuth();
     if (auth && auth.currentUser) {
       console.log('[Admin] User authenticated, undoing action in Firebase');
       set(eventRef, lastAction.previousState).catch((error) => {
@@ -414,6 +417,7 @@ export function AdminApp() {
       // Write the reset event to Firebase
       console.log('[Admin] Resetting event, writing default to Firebase');
       
+      const auth = getAuth();
       if (auth && auth.currentUser) {
         console.log('[Admin] User authenticated, resetting event in Firebase');
         set(eventRef, resetEvent).catch((error) => {
@@ -441,6 +445,7 @@ export function AdminApp() {
       // Try to sign out of Firebase Auth
       const { signOut } = await import('firebase/auth');
       
+      const auth = getAuth();
       if (auth) {
         await signOut(auth);
         console.log('✅ Signed out of Firebase');
@@ -466,6 +471,7 @@ export function AdminApp() {
     // Write to Firebase
     console.log('[Admin] Setting custom message in Firebase');
     
+    const auth = getAuth();
     if (auth && auth.currentUser) {
       console.log('[Admin] User authenticated, setting custom message in Firebase');
       set(eventRef, updatedEvent).catch((error) => {
@@ -499,6 +505,7 @@ export function AdminApp() {
     // Write to Firebase
     console.log('[Admin] Clearing custom message in Firebase');
     
+    const auth = getAuth();
     if (auth && auth.currentUser) {
       console.log('[Admin] User authenticated, clearing custom message in Firebase');
       set(eventRef, updatedEvent).catch((error) => {
