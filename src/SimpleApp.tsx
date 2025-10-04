@@ -632,7 +632,7 @@ function SimpleApp() {
                 position: 'relative', // For absolute positioned timer
                 backgroundColor,
                 border: `${borderWidth} solid ${borderColor}`,
-                padding: (isCurrentStop || isRunningTo) ? '2.25rem 0.75rem 0.75rem 0.75rem' : '0.75rem', // Extra top padding for current stop or running to
+                padding: ((isCurrentStop && stop.position > 0 && stop.position < event.stops.length - 1) || (isRunningTo && stop.position > 0)) ? '2.25rem 0.75rem 0.75rem 0.75rem' : '0.75rem', // Extra top padding for current stop (not first/last) or running to any stop (not first)
                 marginBottom: '0.75rem',
                 marginRight: '0.5rem', // Reduce right margin
                 opacity,
@@ -642,8 +642,8 @@ function SimpleApp() {
                 width: '100%' // Full width of container
               }}
             >
-              {/* Visual Timer Dots for Current Stop or Running To - at top edge */}
-              {(isCurrentStop || isRunningTo) && (
+              {/* Visual Timer Dots for Current Stop or Running To - at top edge (not for first/last stops when at them, but allow running to last stop) */}
+              {((isCurrentStop && stop.position > 0 && stop.position < event.stops.length - 1) || (isRunningTo && stop.position > 0)) && (
                 <VisualTimerDots
                   stop={stop}
                   isActive={isActive}
