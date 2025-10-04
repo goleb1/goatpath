@@ -117,6 +117,150 @@ const leTour2025: Event = {
 
 
 
+// Visual Timer Dots Component for Main Page
+function VisualTimerDots({ stop, isActive, isRunning }: { stop: Stop; isActive: boolean; isRunning: boolean }) {
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [animationOffset, setAnimationOffset] = useState(0);
+  const [pulseState, setPulseState] = useState(false);
+
+  // Separate pulse effect that runs every 500ms
+  useEffect(() => {
+    const pulseInterval = setInterval(() => {
+      setPulseState(prev => !prev);
+    }, 500);
+    return () => clearInterval(pulseInterval);
+  }, []);
+
+  useEffect(() => {
+    if (!isActive && !isRunning) {
+      setElapsedSeconds(0);
+      return;
+    }
+
+    let startTime: Date | null = null;
+
+    if (isActive && stop.arrivalTime) {
+      startTime = new Date(stop.arrivalTime);
+    } else if (isRunning && stop.departureTime) {
+      startTime = new Date(stop.departureTime);
+    }
+
+    if (!startTime) return;
+
+    const updateTimer = () => {
+      const now = new Date();
+      const diffMs = now.getTime() - startTime.getTime();
+      const diffSeconds = Math.floor(diffMs / 1000);
+      setElapsedSeconds(Math.max(0, diffSeconds));
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+
+    return () => clearInterval(interval);
+  }, [isActive, isRunning, stop.arrivalTime, stop.departureTime]);
+
+  // Running animation effect
+  useEffect(() => {
+    if (!isRunning) {
+      setAnimationOffset(0);
+      return;
+    }
+
+    const animationInterval = setInterval(() => {
+      setAnimationOffset(prev => (prev + 1) % 40); // 40 steps for smooth animation across 20 dots
+    }, 100); // Update every 100ms for smooth movement
+
+    return () => clearInterval(animationInterval);
+  }, [isRunning]);
+
+  const totalDots = 20;
+  const elapsedMinutes = Math.floor(elapsedSeconds / 60);
+  const isOvertime = elapsedMinutes >= 20;
+
+  const getDotColor = (index: number) => {
+    if (isRunning) {
+      const runningPosition = Math.floor(animationOffset / 2); // Convert to 0-19 range
+      if (index === runningPosition) {
+        return '#EBE4C1'; // White for running indicator
+      }
+      return '#444444'; // Dark for inactive during running
+    }
+
+    if (!isActive) {
+      return '#444444'; // Dark when not active
+    }
+
+    if (isOvertime) {
+      // Blink red when overtime
+      const blinkPhase = Math.floor(elapsedSeconds / 1) % 2; // Blink every second
+      return blinkPhase === 0 ? '#FF4444' : '#AA2222';
+    }
+
+    // Dots that have already gone out
+    if (index < elapsedMinutes) {
+      return '#444444'; // Dark for elapsed time
+    }
+
+    // Current minute dot - pulse the dot that's about to go out
+    if (index === elapsedMinutes && elapsedMinutes < 20) {
+      const baseColor = index < 10 ? '#00FF88' : index < 15 ? '#FFBB00' : '#FF4444';
+      const dimColor = index < 10 ? '#004433' : index < 15 ? '#665500' : '#662222'; // Dimmed version instead of black
+
+      return pulseState ? baseColor : dimColor;
+    }
+
+    // Remaining dots - normal colors
+    if (index < 10) {
+      return '#00FF88'; // Green for first 10 minutes
+    } else if (index < 15) {
+      return '#FFBB00'; // Yellow for minutes 10-15
+    } else {
+      return '#FF4444'; // Red for final 5 minutes
+    }
+  };
+
+  const getDotOpacity = (index: number) => {
+    if (isRunning) {
+      const runningPosition = Math.floor(animationOffset / 2);
+      return index === runningPosition ? 1 : 0.3;
+    }
+    return 1;
+  };
+
+  return (
+    <div style={{
+      display: 'flex',
+      gap: '3px',
+      padding: '8px 12px',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      position: 'absolute',
+      top: '0',
+      left: '0',
+      right: '0',
+      backgroundColor: 'rgba(50, 78, 128, 0.9)', // Semi-transparent overlay
+      borderRadius: '0',
+      zIndex: 1 // Ensure dots are above the card background but below other elements
+    }}>
+      {Array.from({ length: totalDots }, (_, index) => (
+        <div
+          key={index}
+          style={{
+            width: '12px',
+            height: '12px',
+            borderRadius: '50%',
+            backgroundColor: getDotColor(index),
+            opacity: getDotOpacity(index),
+            transition: isRunning ? 'opacity 0.1s ease' : 'background-color 0.3s ease',
+            border: '1px solid #666666'
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 // Enhanced Route Card Timer Component
 function RouteCardTimer({ event, stop, index }: { event: Event; stop: Stop; index: number }) {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -488,7 +632,7 @@ function SimpleApp() {
                 position: 'relative', // For absolute positioned timer
                 backgroundColor,
                 border: `${borderWidth} solid ${borderColor}`,
-                padding: '0.75rem',
+                padding: isCurrentStop ? '2.25rem 0.75rem 0.75rem 0.75rem' : '0.75rem', // Extra top padding for current stop
                 marginBottom: '0.75rem',
                 marginRight: '0.5rem', // Reduce right margin
                 opacity,
@@ -498,7 +642,15 @@ function SimpleApp() {
                 width: '100%' // Full width of container
               }}
             >
-              {/* Status or Timer in top right corner */}
+              {/* Visual Timer Dots for Current Stop - at top edge */}
+              {isCurrentStop && (
+                <VisualTimerDots
+                  stop={stop}
+                  isActive={isActive}
+                  isRunning={isRunningTo}
+                />
+              )}
+              {/* Status in top right corner */}
               {stop.status === 'completed' ? (
                 <div style={{
                   position: 'absolute',
@@ -506,7 +658,8 @@ function SimpleApp() {
                   right: '0.75rem',
                   fontSize: '0.8rem', 
                   fontWeight: 'bold',
-                  color: '#7195CD' // Dimmed Danube for completed
+                  color: '#7195CD', // Dimmed Danube for completed
+                  zIndex: 2 // Above the dots
                 }}>
                   COMPLETED
                 </div>
@@ -517,21 +670,12 @@ function SimpleApp() {
                   right: '0.75rem',
                   fontSize: '0.8rem', 
                   fontWeight: 'bold',
-                  color: '#B1CDFF' // Melrose for upcoming
+                  color: '#B1CDFF', // Melrose for upcoming
+                  zIndex: 2 // Above the dots
                 }}>
                   UPCOMING
                 </div>
-              ) : (
-                <div style={{
-                  position: 'absolute',
-                  top: '0.75rem',
-                  right: '0.75rem',
-                  display: 'flex',
-                  justifyContent: 'flex-end'
-                }}>
-                  <RouteCardTimer event={event} stop={stop} index={index} />
-                </div>
-              )}
+              ) : null}
               
               <div style={{ 
                 display: 'flex', 
@@ -550,6 +694,10 @@ function SimpleApp() {
                   {isCurrentStop && ' ← AT STOP'}
                   {isRunningTo && ' ← RUNNING TO'}
                 </div>
+                {/* Timer aligned with status text */}
+                {(isCurrentStop || isRunningTo) && (
+                  <RouteCardTimer event={event} stop={stop} index={index} />
+                )}
               </div>
               <h3 style={{ 
                 fontSize: (isCurrentStop || isRunningTo) ? '1.25rem' : '1.125rem',
