@@ -231,7 +231,7 @@ function VisualTimerDots({ stop, isActive, isRunning }: { stop: Stop; isActive: 
   return (
     <div style={{
       display: 'flex',
-      gap: '3px',
+      gap: '2px',
       padding: '8px 12px',
       justifyContent: 'space-between',
       alignItems: 'center',
@@ -247,8 +247,8 @@ function VisualTimerDots({ stop, isActive, isRunning }: { stop: Stop; isActive: 
         <div
           key={index}
           style={{
-            width: '12px',
-            height: '12px',
+            width: '10px',
+            height: '10px',
             borderRadius: '50%',
             backgroundColor: getDotColor(index),
             opacity: getDotOpacity(index),
