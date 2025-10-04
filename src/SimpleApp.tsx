@@ -694,8 +694,8 @@ function SimpleApp() {
                   {isCurrentStop && ' ← AT STOP'}
                   {isRunningTo && ' ← RUNNING TO'}
                 </div>
-                {/* Timer aligned with status text */}
-                {(isCurrentStop || isRunningTo) && (
+                {/* Timer aligned with status text (not for first stop, not for last stop when at it) */}
+                {((isCurrentStop && stop.position > 0 && stop.position < event.stops.length - 1) || (isRunningTo && stop.position > 0)) && (
                   <RouteCardTimer event={event} stop={stop} index={index} />
                 )}
               </div>
