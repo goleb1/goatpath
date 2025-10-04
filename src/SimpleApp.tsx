@@ -632,7 +632,7 @@ function SimpleApp() {
                 position: 'relative', // For absolute positioned timer
                 backgroundColor,
                 border: `${borderWidth} solid ${borderColor}`,
-                padding: isCurrentStop ? '2.25rem 0.75rem 0.75rem 0.75rem' : '0.75rem', // Extra top padding for current stop
+                padding: (isCurrentStop || isRunningTo) ? '2.25rem 0.75rem 0.75rem 0.75rem' : '0.75rem', // Extra top padding for current stop or running to
                 marginBottom: '0.75rem',
                 marginRight: '0.5rem', // Reduce right margin
                 opacity,
@@ -642,8 +642,8 @@ function SimpleApp() {
                 width: '100%' // Full width of container
               }}
             >
-              {/* Visual Timer Dots for Current Stop - at top edge */}
-              {isCurrentStop && (
+              {/* Visual Timer Dots for Current Stop or Running To - at top edge */}
+              {(isCurrentStop || isRunningTo) && (
                 <VisualTimerDots
                   stop={stop}
                   isActive={isActive}
