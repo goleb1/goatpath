@@ -12,7 +12,7 @@ export const leTour2025: Event = {
     {
       id: 'stop1',
       name: 'Grimm Central',
-      address: '704 Crystal Drive',
+      address: '123 Maple Street',
       position: 0,
       distanceToNext: '2.0 miles',
       status: 'pending'
@@ -20,7 +20,7 @@ export const leTour2025: Event = {
     {
       id: 'stop2',
       name: 'McGee Metro',
-      address: '64 Woodhaven Drive',
+      address: '456 Oak Avenue',
       position: 1,
       distanceToNext: '1.0 miles',
       status: 'pending'
@@ -28,7 +28,7 @@ export const leTour2025: Event = {
     {
       id: 'stop3',
       name: 'Brasacchio Boulevard',
-      address: '217 Vernon Drive',
+      address: '789 Pine Road',
       position: 2,
       distanceToNext: '1.6 miles',
       status: 'pending'
@@ -36,7 +36,7 @@ export const leTour2025: Event = {
     {
       id: 'stop4',
       name: 'Styler Station',
-      address: '631 Osage Road',
+      address: '234 Elm Street',
       position: 3,
       distanceToNext: '0.9 miles',
       status: 'pending'
@@ -44,7 +44,7 @@ export const leTour2025: Event = {
     {
       id: 'stop5',
       name: 'Holliday Heights',
-      address: '1641 Williamsburg Road',
+      address: '567 Cedar Lane',
       position: 4,
       distanceToNext: '2.9 miles',
       status: 'pending'
@@ -52,7 +52,7 @@ export const leTour2025: Event = {
     {
       id: 'stop6',
       name: 'Albert Avenue',
-      address: '2856 Broadway Avenue',
+      address: '890 Birch Drive',
       position: 5,
       distanceToNext: '2.1 miles',
       status: 'pending'
@@ -60,7 +60,7 @@ export const leTour2025: Event = {
     {
       id: 'stop7',
       name: 'Baird Terminal',
-      address: '1636 Bellaire Place',
+      address: '345 Willow Court',
       position: 6,
       distanceToNext: '1.2 miles',
       status: 'pending'
@@ -68,7 +68,7 @@ export const leTour2025: Event = {
     {
       id: 'stop8',
       name: 'Golebie Grand',
-      address: '954 Norwich Avenue',
+      address: '678 Spruce Way',
       position: 7,
       distanceToNext: '2.1 miles',
       status: 'pending'
@@ -76,7 +76,7 @@ export const leTour2025: Event = {
     {
       id: 'stop9',
       name: 'Baldasare Union',
-      address: '325 Tampa Avenue',
+      address: '901 Aspen Boulevard',
       position: 8,
       status: 'pending'
     }
