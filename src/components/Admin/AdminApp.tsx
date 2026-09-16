@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
-import { deriveEventState } from '../../lib/state';
+import { buildShareContent, shareUpdate } from '../../lib/share';
+import { deriveEventState, getGoatArtwork } from '../../lib/state';
 import { useLiveEvent } from '../../hooks/useLiveEvent';
 import type { Event, Stop } from '../../types/Event';
 
@@ -31,7 +32,13 @@ export function AdminApp() {
   const [pending, setPending] = useState<string | null>(null);
   const [notice, setNotice] = useState('');
   const [isConflict, setIsConflict] = useState(false);
+  const [shareStatus, setShareStatus] = useState('');
+  const [manualShareText, setManualShareText] = useState('');
   const nearby = [state.previous, state.current, state.next].filter(isStop);
+  const shareContent = useMemo(
+    () => buildShareContent(event, state, live.now, `${window.location.origin}/`),
+    [event, state, live.now],
+  );
 
   useEffect(() => {
     let active = true;
@@ -114,9 +121,21 @@ export function AdminApp() {
     }
   }
 
+  async function shareServiceUpdate() {
+    setShareStatus('');
+    setManualShareText('');
+    try {
+      const result = await shareUpdate(shareContent);
+      setShareStatus(result === 'shared' ? 'Update shared.' : result === 'copied' ? 'Update copied.' : 'Share cancelled.');
+    } catch {
+      setShareStatus('Sharing is unavailable. Select and copy the update below.');
+      setManualShareText(shareContent.manualText);
+    }
+  }
+
   if (auth !== 'signed-in') {
     return <div className="app-shell admin-shell">
-      <header className="brand-header"><img className="express-logo" src="/SHBACExpress.png" alt="SHBAC Express" /><div className="admin-title">ADMIN CONTROL</div></header>
+      <header className="brand-header"><img className="express-logo" src="/SHBACExpress.png" alt="SHBAC Express" /><img className="goat-logo" src={getGoatArtwork(event.stops)} alt="South Hillbillies goat" /></header>
       <main>
         <section className="admin-card admin-login">
           <div className="section-label">SECURE OPERATOR SIGN-IN</div>
@@ -134,7 +153,7 @@ export function AdminApp() {
   return <div className="app-shell admin-shell">
     <header className="brand-header">
       <img className="express-logo" src="/SHBACExpress.png" alt="SHBAC Express" />
-      <div className="admin-title">ADMIN CONTROL</div>
+      <img className="goat-logo" src={getGoatArtwork(event.stops)} alt="South Hillbillies goat" />
     </header>
     <main>
       <div className="admin-session"><span>Authenticated · revision {event.revision}</span><button className="text-button" onClick={logout} disabled={pending !== null}>Sign out</button></div>
@@ -154,6 +173,14 @@ export function AdminApp() {
             <button className="button" disabled={pending !== null || stop.status !== 'active'} onClick={() => runCommand({ type: 'depart', stopIndex: stop.position }, 'Departure')}>{pending === 'Departure' ? 'Saving…' : 'Departed'}</button>
           </div>}
         </div>)}
+      </section>
+
+      <section className="admin-card">
+        <div className="section-label">SHARE CURRENT SERVICE UPDATE</div>
+        <p className="share-preview">{shareContent.text}</p>
+        <button className="button" disabled={pending !== null} onClick={shareServiceUpdate}>Share service update</button>
+        {shareStatus && <p className="share-status" aria-live="polite">{shareStatus}</p>}
+        {manualShareText && <textarea className="manual-share" readOnly aria-label="Service update to copy" value={manualShareText} onFocus={(input) => input.currentTarget.select()} />}
       </section>
 
       <section className="admin-card">
