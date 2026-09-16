@@ -12,8 +12,6 @@ const dateTime = (value: string | undefined, timezone: string) =>
     ? new Intl.DateTimeFormat('en-US', { timeZone: timezone, hour: 'numeric', minute: '2-digit' }).format(new Date(value))
     : '—';
 
-const compactMiles = (miles: number) => `${miles.toFixed(1)} mi`;
-
 function directionsUrl(stop: Stop | null) {
   return stop?.address
     ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(stop.address)}`
@@ -22,31 +20,11 @@ function directionsUrl(stop: Stop | null) {
 
 function statusContent(event: Event, state: EventViewState) {
   const name = state.current?.name ?? 'the route';
-  if (state.phase === 'at_stop') return { eyebrow: 'NOW AT', title: name, body: `Arrived ${dateTime(state.current?.arrivalTime, event.timezone)}` };
-  if (state.phase === 'en_route') return { eyebrow: 'EN ROUTE TO', title: name, body: `Departed ${state.previous?.name ?? 'the previous stop'} at ${dateTime(state.previous?.departureTime, event.timezone)}` };
+  const lastKnown = state.freshness === 'stale' || state.freshness === 'offline' || state.freshness === 'error';
+  if (state.phase === 'at_stop') return { eyebrow: lastKnown ? 'LAST CONFIRMED AT' : 'NOW AT', title: name, body: `Arrived ${dateTime(state.current?.arrivalTime, event.timezone)}` };
+  if (state.phase === 'en_route') return { eyebrow: lastKnown ? 'LAST CONFIRMED · EN ROUTE TO' : 'EN ROUTE TO', title: name, body: `Departed ${state.previous?.name ?? 'the previous stop'} at ${dateTime(state.previous?.departureTime, event.timezone)}` };
   if (state.phase === 'complete') return { eyebrow: 'SERVICE COMPLETE', title: name, body: 'The herd reached the end of the line.' };
   return { eyebrow: 'FRIDAY · SEPTEMBER 18', title: `Meet at ${event.stops[0]?.name ?? 'the starting stop'}`, body: 'Arrive around 5:00pm · departing at 5:30pm' };
-}
-
-function serviceMessage(event: Event, state: EventViewState) {
-  if (state.freshness === 'stale') return `SERVICE CHECK · ${state.current?.name ?? 'CURRENT LOCATION'} IS THE LAST CONFIRMED STOP`;
-  if (state.freshness === 'offline') return 'OFFLINE · SHOWING LAST KNOWN SERVICE';
-  if (state.freshness === 'error') return 'SIGNAL TROUBLE · SHOWING LAST KNOWN SERVICE';
-  if (event.customMessage) return `SERVICE NOTICE · ${event.customMessage}`;
-  if (state.phase === 'pregame') return 'ALL ABOARD · BAIRD TERMINAL DEPARTS 5:30PM';
-  if (state.phase === 'complete') return 'END OF THE LINE · THANKS FOR RIDING SHBAC EXPRESS';
-  if (state.phase === 'at_stop') {
-    const distance = state.current?.distanceToNextMiles;
-    return state.next
-      ? `NOW AT ${state.current?.name.toUpperCase()} · NEXT ${state.next.name.toUpperCase()}${distance == null ? '' : ` · ${compactMiles(distance)}`}`
-      : `NOW AT ${state.current?.name.toUpperCase()} · FINAL STOP`;
-  }
-  const distance = state.previous?.distanceToNextMiles;
-  return `EXPRESS SERVICE TO ${state.current?.name.toUpperCase()}${distance == null ? '' : ` · ${compactMiles(distance)}`}`;
-}
-
-function ServiceStrip({ event, state }: { event: Event; state: EventViewState }) {
-  return <div className={`service-strip service-strip--${state.freshness}`} role="status">{serviceMessage(event, state)}</div>;
 }
 
 const elapsedLabel = (seconds: number) => {
@@ -111,11 +89,11 @@ function StopLine({ state }: { state: EventViewState }) {
 }
 
 function RouteDetails({ event, state }: { event: Event; state: EventViewState }) {
-  const legLabel = (stop: Stop) => {
+  const statusLabel = (stop: Stop) => {
     if (stop.status === 'completed') return 'complete';
     if (stop.status === 'active') return 'here now';
     if (stop.distanceToNextMiles == null) return 'final stop';
-    return `${stop.distanceToNextMiles.toFixed(1)} mi to next`;
+    return null;
   };
   return <details className="route-card">
     <summary>
@@ -126,12 +104,18 @@ function RouteDetails({ event, state }: { event: Event; state: EventViewState })
       </span>
     </summary>
     <ol>
-      {event.stops.map((stop) => <li className={stop.id === state.current?.id ? 'is-current' : ''} key={stop.id}>
-        <span>{String(stop.position + 1).padStart(2, '0')} · {stop.name}</span>
-        <small>{legLabel(stop)}</small>
-      </li>)}
+      {event.stops.map((stop, index) => {
+        const destination = event.stops[index + 1];
+        const showLeg = stop.status !== 'completed' && destination && stop.distanceToNextMiles != null;
+        return <li className={stop.id === state.current?.id ? 'is-current' : ''} key={stop.id}>
+          <div className="route-card__stop-row">
+            <span>{String(stop.position + 1).padStart(2, '0')} · {stop.name}</span>
+            {statusLabel(stop) && <small>{statusLabel(stop)}</small>}
+          </div>
+          {showLeg && <span className="route-card__leg">{stop.distanceToNextMiles!.toFixed(1)} mi → {destination.name}</span>}
+        </li>;
+      })}
     </ol>
-    <p className="data-note">Leg distances follow the official 10.1-mile GPX route. Directions appear when the private event feed is connected.</p>
   </details>;
 }
 
@@ -188,12 +172,12 @@ export default function PublicApp() {
       <img className="express-logo" src="/SHBACExpress.png" alt="SHBAC Express" />
       <img className="goat-logo" src={getGoatArtwork(event.stops)} alt="South Hillbillies goat" />
     </header>
-    <ServiceStrip event={event} state={state} />
     <main>
       <section className="hero">
         <span className="section-label">{hero.eyebrow}</span>
         <h1>{hero.title}</h1>
         <p>{hero.body}</p>
+        {event.customMessage && <p className="hero__notice">{event.customMessage}</p>}
       </section>
 
       <JourneySignal event={event} state={state} />
