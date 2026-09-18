@@ -1,26 +1,66 @@
-import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, onValue, set, off } from 'firebase/database';
+import { getApp, getApps, initializeApp } from 'firebase/app';
+import { getDatabase, onValue, ref } from 'firebase/database';
+import type { Event } from './types/Event';
 
-// Firebase configuration
-// You need to replace these with your actual Firebase config
-// Get this from Firebase Console > Project Settings > General > Your apps
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "your-api-key",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "your-project.firebaseapp.com",
-  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || "https://your-project-default-rtdb.firebaseio.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "your-project",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "your-project.appspot.com",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "123456789",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:123456789:web:abcdef"
-};
+const keys = [
+  'VITE_FIREBASE_API_KEY',
+  'VITE_FIREBASE_AUTH_DOMAIN',
+  'VITE_FIREBASE_DATABASE_URL',
+  'VITE_FIREBASE_PROJECT_ID',
+  'VITE_FIREBASE_APP_ID',
+  'VITE_GOATPATH_EVENT_ID',
+] as const;
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
+const eventId = import.meta.env.VITE_GOATPATH_EVENT_ID;
+const validEventId = typeof eventId === 'string'
+  && /^[A-Za-z0-9_-]{32,128}$/.test(eventId)
+  && eventId !== 'event2026';
 
-// Event reference
-export const eventRef = ref(database, 'event');
+export const firebaseConfigured = keys.every((key) => Boolean(import.meta.env[key])) && validEventId;
 
-// Helper functions
-export { onValue, set, off };
-export { database };
+export function subscribeToEvent(
+  receive: (event: Event) => void,
+  fail: (error: Error) => void,
+  connection?: (connected: boolean) => void,
+): () => void {
+  if (!firebaseConfigured) {
+    fail(new Error('Live service is not configured.'));
+    return () => undefined;
+  }
+  const app = getApps().length ? getApp() : initializeApp({
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  });
+  const database = getDatabase(app);
+  const unsubscribeEvent = onValue(
+    ref(database, `publicEvents/${eventId}`),
+    (snapshot) => {
+      const value: unknown = snapshot.val();
+      if (isEvent(value)) receive(value);
+      else fail(new Error('Live event data is unavailable or invalid.'));
+    },
+    (error) => fail(error),
+  );
+  const unsubscribeConnection = connection
+    ? onValue(ref(database, '.info/connected'), (snapshot) => connection(snapshot.val() === true))
+    : () => undefined;
+  return () => {
+    unsubscribeEvent();
+    unsubscribeConnection();
+  };
+}
+
+function isEvent(value: unknown): value is Event {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Partial<Event>;
+  return typeof candidate.id === 'string'
+    && Array.isArray(candidate.stops)
+    && typeof candidate.updatedAt === 'string'
+    && typeof candidate.revision === 'number'
+    && Number.isSafeInteger(candidate.revision);
+}
