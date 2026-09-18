@@ -1,7 +1,7 @@
-import { clearLoginAttempts, clientAddressKey, consumeLoginAttempt } from '../_lib/firebaseAdmin';
-import { errorBody, methodNotAllowed, objectBody, requireAllowedOrigin, requireJson } from '../_lib/http';
-import type { ApiRequest, ApiResponse } from '../_lib/http';
-import { issueSessionCookie, validAdminSecret } from '../_lib/session';
+import { clearLoginAttempts, clientAddressKey, consumeLoginAttempt } from '../_lib/firebaseAdmin.js';
+import { errorBody, methodNotAllowed, objectBody, requireAllowedOrigin, requireJson } from '../_lib/http.js';
+import type { ApiRequest, ApiResponse } from '../_lib/http.js';
+import { issueSessionCookie, validAdminSecret } from '../_lib/session.js';
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   res.setHeader('Cache-Control', 'no-store');

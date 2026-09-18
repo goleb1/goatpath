@@ -1,9 +1,9 @@
-import { applyCommand, parseCommand, publicEvent } from '../_lib/commands';
-import type { ApplyResult } from '../_lib/commands';
-import { adminDatabase, configuredEventId } from '../_lib/firebaseAdmin';
-import { errorBody, methodNotAllowed, requireAllowedOrigin, requireJson } from '../_lib/http';
-import type { ApiRequest, ApiResponse } from '../_lib/http';
-import { hasValidSession } from '../_lib/session';
+import { applyCommand, parseCommand, publicEvent } from '../_lib/commands.js';
+import type { ApplyResult } from '../_lib/commands.js';
+import { adminDatabase, configuredEventId } from '../_lib/firebaseAdmin.js';
+import { errorBody, methodNotAllowed, requireAllowedOrigin, requireJson } from '../_lib/http.js';
+import type { ApiRequest, ApiResponse } from '../_lib/http.js';
+import { hasValidSession } from '../_lib/session.js';
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   res.setHeader('Cache-Control', 'no-store');

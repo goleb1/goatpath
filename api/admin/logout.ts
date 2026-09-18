@@ -1,6 +1,6 @@
-import { errorBody, methodNotAllowed, requireAllowedOrigin, requireJson } from '../_lib/http';
-import type { ApiRequest, ApiResponse } from '../_lib/http';
-import { clearSessionCookie } from '../_lib/session';
+import { errorBody, methodNotAllowed, requireAllowedOrigin, requireJson } from '../_lib/http.js';
+import type { ApiRequest, ApiResponse } from '../_lib/http.js';
+import { clearSessionCookie } from '../_lib/session.js';
 
 export default function handler(req: ApiRequest, res: ApiResponse) {
   res.setHeader('Cache-Control', 'no-store');
