@@ -19,6 +19,7 @@ main { width: min(100%, 760px); margin: 0 auto; padding: 14px; }
 .hero h1 { margin: 5px 0 6px; font-size: clamp(2rem, 11vw, 4.2rem); line-height: .96; letter-spacing: -.06em; }
 .hero p, .intercept-card p { margin: 0; color: #c9d8f5; line-height: 1.45; }
 .hero .hero__notice { margin-top: 10px; padding-left: 10px; border-left: 3px solid #f0b85d; color: #ebe4c1; font-size: .76rem; }
+.hero .hero__directions { margin-top: 16px; }
 .hero--compact h1 { font-size: 2.4rem; text-transform: uppercase; }
 .section-label { color: #9bbaff; font-size: .68rem; font-weight: 700; letter-spacing: .12em; }
 .intercept-card, .route-card, .report-card, .admin-card { padding: 16px; border: 2px solid #7195cd; background: #253858; box-shadow: 6px 6px 0 rgba(0,0,0,.24); }
@@ -41,16 +42,7 @@ main { width: min(100%, 760px); margin: 0 auto; padding: 14px; }
 .button--secondary { background: transparent; color: #b1cdff; border: 2px solid #7195cd; }
 .button--strava { background: #fc4c02; color: white; }
 .button--danger { background: #c96767; }
-.stop-line { margin: 18px 0; padding: 4px 10px; }
-.stop-line__row { min-height: 56px; display: grid; grid-template-columns: 24px 1fr; gap: 8px; color: #92a2c2; }
-.stop-line__row small, .stop-line__row strong { display: block; }
-.stop-line__row small { font-size: .62rem; text-transform: uppercase; }
-.stop-line__row strong { color: #c9d8f5; }
-.stop-line__row.is-current strong { color: #fff; font-size: 1.1rem; }
-.stop-line__track { position: relative; display: flex; justify-content: center; }
-.stop-line__track i { width: 13px; height: 13px; margin-top: 5px; border: 3px solid #7195cd; border-radius: 50%; background: #231f20; z-index: 1; }
-.stop-line__row.is-current i { background: #b1cdff; box-shadow: 0 0 0 4px rgba(177,205,255,.18); }
-.stop-line__track b { position: absolute; top: 18px; bottom: -5px; width: 3px; background: #7195cd; }
+
 .route-card { margin: 14px 0; padding: 0; }
 .route-card summary { padding: 13px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: .8rem; font-weight: 700; list-style: none; }
 .route-card summary::-webkit-details-marker { display: none; }
@@ -117,4 +109,4 @@ textarea { min-height: 90px; resize: vertical; }
 @keyframes running-light { 0%, 32%, 100% { background: #42506a; opacity: .34; transform: scale(.72); } 12% { background: #ebe4c1; opacity: 1; transform: scale(1); } }
 @media (min-width: 700px) { main { padding: 24px; } .brand-header { padding-inline: max(24px, calc((100vw - 760px)/2)); } }
 @media (prefers-reduced-motion: reduce) { .station-dots i, .running-dots i, .route-card__chevron { animation: none; transition: none; } .running-dots i:nth-child(7) { background: #ebe4c1; opacity: 1; transform: scale(1); } }
-@media print { .brand-header, .hero, .journey-signal, .intercept-card, .stop-line, .route-card, .actions, footer { display: none !important; } body { background: #fff; color: #000; } .report-card { box-shadow: none; background: #fff; color: #000; border-color: #000; } }
+@media print { .brand-header, .hero, .journey-signal, .intercept-card, .route-card, .actions, footer { display: none !important; } body { background: #fff; color: #000; } .report-card { box-shadow: none; background: #fff; color: #000; border-color: #000; } }

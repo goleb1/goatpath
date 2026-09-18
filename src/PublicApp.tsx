@@ -74,20 +74,6 @@ function JourneySignal({ event, state }: { event: Event; state: EventViewState }
   </section>;
 }
 
-function StopLine({ state }: { state: EventViewState }) {
-  const rows = [
-    { label: 'Previous', stop: state.previous },
-    { label: state.phase === 'en_route' ? 'Destination' : 'Current', stop: state.current },
-    { label: 'Next', stop: state.next },
-  ].filter((row) => row.stop);
-  return <section className="stop-line" aria-label="Nearby route stops">
-    {rows.map((row, index) => <div className={row.stop?.id === state.current?.id ? 'stop-line__row is-current' : 'stop-line__row'} key={row.stop?.id}>
-      <span className="stop-line__track"><i />{index < rows.length - 1 && <b />}</span>
-      <span><small>{row.label}</small><strong>{row.stop?.name}</strong></span>
-    </div>)}
-  </section>;
-}
-
 function RouteDetails({ event, state }: { event: Event; state: EventViewState }) {
   const statusLabel = (stop: Stop) => {
     if (stop.status === 'completed') return 'complete';
@@ -175,6 +161,7 @@ export default function PublicApp() {
           ? null
           : 'Live ETA updates after the next check-in.';
   const direction = directionsUrl(intercept.stop);
+  const activeService = state.phase === 'at_stop' || state.phase === 'en_route';
   const previewMode = new URLSearchParams(window.location.search).get('preview');
   const isDesignPreview = isPreviewMode(previewMode);
 
@@ -193,19 +180,21 @@ export default function PublicApp() {
         <h1>{hero.title}</h1>
         <p>{hero.body}</p>
         {event.customMessage && <p className="hero__notice">{event.customMessage}</p>}
+        {state.phase === 'pregame' && (direction
+          ? <a className="button hero__directions" href={direction} target="_blank" rel="noreferrer">Get directions</a>
+          : <button className="button hero__directions" disabled>Directions pending address</button>)}
       </section>
 
       <JourneySignal event={event} state={state} />
 
-      <section className="intercept-card">
+      {activeService && <section className="intercept-card">
         <span className="section-label">BEST INTERCEPT</span>
         <h2>{intercept.stop?.name ?? 'No stop available'}</h2>
         <p>{intercept.reason}</p>
         {etaText && <p className="eta">{etaText}</p>}
         {direction ? <a className="button" href={direction} target="_blank" rel="noreferrer">Get directions</a> : <button className="button" disabled>Directions pending address</button>}
-      </section>
+      </section>}
 
-      <StopLine state={state} />
       <RouteDetails event={event} state={state} />
       {state.phase === 'complete' && <ServiceReport event={event} />}
 
