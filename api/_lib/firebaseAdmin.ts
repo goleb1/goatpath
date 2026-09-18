@@ -1,17 +1,34 @@
 import { createHash } from 'node:crypto';
 import { applicationDefault, cert, getApps, initializeApp } from 'firebase-admin/app';
+import type { Credential } from 'firebase-admin/app';
 import { getDatabase } from 'firebase-admin/database';
 import type { ApiRequest } from './http';
 
 const EVENT_ID_PATTERN = /^[A-Za-z0-9_-]{32,128}$/;
+let credential: Credential | null = null;
+
+function adminCredential(): Credential {
+  if (credential) return credential;
+  const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+  credential = serviceAccount ? cert(JSON.parse(serviceAccount)) : applicationDefault();
+  return credential;
+}
+
+export function configuredDatabaseUrl(): string {
+  const databaseURL = process.env.FIREBASE_DATABASE_URL;
+  if (!databaseURL) throw new Error('FIREBASE_DATABASE_URL is required.');
+  return databaseURL.replace(/\/$/, '');
+}
+
+export async function adminAccessToken(): Promise<string> {
+  const token = await adminCredential().getAccessToken();
+  if (!token.access_token) throw new Error('Firebase Admin access token is unavailable.');
+  return token.access_token;
+}
 
 function adminApp() {
   if (getApps().length) return getApps()[0]!;
-  const databaseURL = process.env.FIREBASE_DATABASE_URL;
-  if (!databaseURL) throw new Error('FIREBASE_DATABASE_URL is required.');
-  const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-  const credential = serviceAccount ? cert(JSON.parse(serviceAccount)) : applicationDefault();
-  return initializeApp({ credential, databaseURL });
+  return initializeApp({ credential: adminCredential(), databaseURL: configuredDatabaseUrl() });
 }
 
 export function adminDatabase() {

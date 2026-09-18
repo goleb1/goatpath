@@ -1,6 +1,5 @@
 import { applyCommand, parseCommand, publicEvent } from '../_lib/commands.js';
-import type { ApplyResult } from '../_lib/commands.js';
-import { adminDatabase, configuredEventId } from '../_lib/firebaseAdmin.js';
+import { adminAccessToken, configuredDatabaseUrl, configuredEventId } from '../_lib/firebaseAdmin.js';
 import { errorBody, methodNotAllowed, requireAllowedOrigin, requireJson } from '../_lib/http.js';
 import type { ApiRequest, ApiResponse } from '../_lib/http.js';
 import { hasValidSession } from '../_lib/session.js';
@@ -15,26 +14,34 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
   try {
     const timestamp = new Date().toISOString();
-    let outcome: ApplyResult | null = null;
-    const reference = adminDatabase().ref(`publicEvents/${configuredEventId()}`);
-    // Warm the serverless SDK cache so the transaction callback does not begin
-    // with a synthetic null and abort before Firebase returns the stored event.
-    const existing = await reference.get();
-    if (!existing.exists()) {
-      return res.status(503).json(errorBody('SERVICE_UNAVAILABLE', 'Event data is unavailable.'));
+    const eventUrl = `${configuredDatabaseUrl()}/publicEvents/${encodeURIComponent(configuredEventId())}.json`;
+    const authorization = `Bearer ${await adminAccessToken()}`;
+    const currentResponse = await fetch(eventUrl, {
+      headers: { Authorization: authorization, 'X-Firebase-ETag': 'true' },
+    });
+    if (!currentResponse.ok) throw new Error('Event read failed.');
+    const etag = currentResponse.headers.get('etag');
+    if (!etag) throw new Error('Firebase ETag is unavailable.');
+    const outcome = applyCommand(await currentResponse.json(), command, timestamp);
+    if (!outcome.ok) return res.status(409).json(errorBody(outcome.code, outcome.message));
+    if (outcome.duplicate) {
+      return res.status(200).json({ event: publicEvent(outcome.event), duplicate: true });
     }
-    const transaction = await reference.transaction((current: unknown) => {
-      outcome = applyCommand(current, command, timestamp);
-      return outcome.ok ? outcome.event : undefined;
-    }, undefined, false);
-    if (!outcome) return res.status(503).json(errorBody('SERVICE_UNAVAILABLE', 'Event update did not complete.'));
-    const resolved = outcome as ApplyResult;
-    if (!resolved.ok) return res.status(409).json(errorBody(resolved.code, resolved.message));
-    if (!transaction.committed && !resolved.duplicate) {
+    const writeResponse = await fetch(eventUrl, {
+      method: 'PUT',
+      headers: {
+        Authorization: authorization,
+        'Content-Type': 'application/json',
+        'If-Match': etag,
+      },
+      body: JSON.stringify(outcome.event),
+    });
+    if (writeResponse.status === 412) {
       return res.status(409).json(errorBody('TRANSACTION_CONFLICT', 'The event changed. Refresh and try again.'));
     }
-    const stored = transaction.snapshot.val() as Record<string, unknown>;
-    return res.status(200).json({ event: publicEvent(stored), duplicate: resolved.duplicate });
+    if (!writeResponse.ok) throw new Error('Event write failed.');
+    const stored = await writeResponse.json() as Record<string, unknown>;
+    return res.status(200).json({ event: publicEvent(stored), duplicate: false });
   } catch {
     return res.status(503).json(errorBody('SERVICE_UNAVAILABLE', 'Admin service is temporarily unavailable.'));
   }
