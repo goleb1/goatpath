@@ -1,6 +1,6 @@
-import { errorBody, methodNotAllowed } from '../_lib/http';
-import type { ApiRequest, ApiResponse } from '../_lib/http';
-import { hasValidSession } from '../_lib/session';
+import { errorBody, methodNotAllowed } from '../_lib/http.js';
+import type { ApiRequest, ApiResponse } from '../_lib/http.js';
+import { hasValidSession } from '../_lib/session.js';
 
 export default function handler(req: ApiRequest, res: ApiResponse) {
   res.setHeader('Cache-Control', 'no-store');
