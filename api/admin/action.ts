@@ -17,6 +17,12 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     const timestamp = new Date().toISOString();
     let outcome: ApplyResult | null = null;
     const reference = adminDatabase().ref(`publicEvents/${configuredEventId()}`);
+    // Warm the serverless SDK cache so the transaction callback does not begin
+    // with a synthetic null and abort before Firebase returns the stored event.
+    const existing = await reference.get();
+    if (!existing.exists()) {
+      return res.status(503).json(errorBody('SERVICE_UNAVAILABLE', 'Event data is unavailable.'));
+    }
     const transaction = await reference.transaction((current: unknown) => {
       outcome = applyCommand(current, command, timestamp);
       return outcome.ok ? outcome.event : undefined;
