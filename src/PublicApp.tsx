@@ -107,10 +107,16 @@ function RouteDetails({ event, state }: { event: Event; state: EventViewState })
       {event.stops.map((stop, index) => {
         const destination = event.stops[index + 1];
         const showLeg = stop.status !== 'completed' && destination && stop.distanceToNextMiles != null;
+        const stopDirections = directionsUrl(stop);
         return <li className={stop.id === state.current?.id ? 'is-current' : ''} key={stop.id}>
           <div className="route-card__stop-row">
             <span>{String(stop.position + 1).padStart(2, '0')} · {stop.name}</span>
-            {statusLabel(stop) && <small>{statusLabel(stop)}</small>}
+            <span className="route-card__stop-meta">
+              {statusLabel(stop) && <small>{statusLabel(stop)}</small>}
+              {stopDirections && <a className="route-card__map" href={stopDirections} target="_blank" rel="noreferrer" aria-label={`Open directions to ${stop.name}`} title={`Directions to ${stop.name}`}>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.5" /></svg>
+              </a>}
+            </span>
           </div>
           {showLeg && <span className="route-card__leg">{stop.distanceToNextMiles!.toFixed(1)} mi → {destination.name}</span>}
         </li>;
@@ -159,6 +165,15 @@ export default function PublicApp() {
   const hero = statusContent(event, state);
   const eta = formatTimeWindow(intercept.arrivalWindow, event.timezone);
   const etaIsPast = Boolean(intercept.arrivalWindow && intercept.arrivalWindow.end.getTime() < now.getTime());
+  const etaText = state.phase === 'complete' && eta
+    ? `Arrived ${eta}`
+    : etaIsPast && eta
+      ? `Last estimate ${eta} · now overdue.`
+      : eta
+        ? `Expected arrival ${eta}`
+        : state.phase === 'pregame'
+          ? null
+          : 'Live ETA updates after the next check-in.';
   const direction = directionsUrl(intercept.stop);
   const previewMode = new URLSearchParams(window.location.search).get('preview');
   const isDesignPreview = isPreviewMode(previewMode);
@@ -186,15 +201,7 @@ export default function PublicApp() {
         <span className="section-label">BEST INTERCEPT</span>
         <h2>{intercept.stop?.name ?? 'No stop available'}</h2>
         <p>{intercept.reason}</p>
-        <p className="eta">{
-          state.phase === 'complete' && eta
-            ? `Arrived ${eta}`
-            : etaIsPast && eta
-              ? `Last estimate ${eta} · now overdue.`
-              : eta
-                ? `Expected arrival ${eta}`
-                : 'ETA unavailable — route distance or pace is not yet configured.'
-        }</p>
+        {etaText && <p className="eta">{etaText}</p>}
         {direction ? <a className="button" href={direction} target="_blank" rel="noreferrer">Get directions</a> : <button className="button" disabled>Directions pending address</button>}
       </section>
 
