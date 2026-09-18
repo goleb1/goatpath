@@ -2,9 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { buildShareContent, shareUpdate } from '../../lib/share';
 import { deriveEventState, getGoatArtwork } from '../../lib/state';
 import { useLiveEvent } from '../../hooks/useLiveEvent';
-import type { Event, Stop } from '../../types/Event';
-
-const isStop = (stop: Stop | null): stop is Stop => stop !== null;
+import type { Event } from '../../types/Event';
 
 type AuthState = 'checking' | 'signed-out' | 'signed-in';
 type CommandInput =
@@ -34,7 +32,13 @@ export function AdminApp() {
   const [isConflict, setIsConflict] = useState(false);
   const [shareStatus, setShareStatus] = useState('');
   const [manualShareText, setManualShareText] = useState('');
-  const nearby = [state.previous, state.current, state.next].filter(isStop);
+  const currentStop = state.current;
+  const nextAction = currentStop?.status === 'pending'
+    ? 'arrive'
+    : currentStop?.status === 'active'
+      ? 'depart'
+      : null;
+  const phaseLabel = state.phase === 'at_stop' ? 'AT STOP' : state.phase === 'en_route' ? 'EN ROUTE' : state.phase.toUpperCase();
   const shareContent = useMemo(
     () => buildShareContent(event, state, live.now, `${window.location.origin}/`),
     [event, state, live.now],
@@ -65,7 +69,7 @@ export function AdminApp() {
       if (!response.ok) throw new Error(await responseError(response));
       setSecret('');
       setAuth('signed-in');
-      setNotice('Signed in.');
+      setNotice('');
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Sign-in failed.');
     } finally {
@@ -156,55 +160,48 @@ export function AdminApp() {
       <img className="goat-logo" src={getGoatArtwork(event.stops)} alt="South Hillbillies goat" />
     </header>
     <main>
-      <div className="admin-session"><span>Authenticated · revision {event.revision}</span><button className="text-button" onClick={logout} disabled={pending !== null}>Sign out</button></div>
+      <section className="admin-card admin-operator">
+        <div className="admin-operator__top">
+          <span className="section-label">NEXT ACTION</span>
+          <span className={`admin-feed is-${state.freshness}`}>FEED {state.freshness}</span>
+        </div>
+        <div className="admin-phase">{phaseLabel} · STOP {currentStop ? currentStop.position + 1 : '—'} OF {event.stops.length}</div>
+        <h1>{currentStop?.name ?? 'No current stop'}</h1>
+        {nextAction === 'arrive' && currentStop && <button className="button admin-primary-action" disabled={pending !== null} onClick={() => runCommand({ type: 'arrive', stopIndex: currentStop.position }, 'Arrival')}>{pending === 'Arrival' ? 'SAVING…' : 'MARK ARRIVED'}</button>}
+        {nextAction === 'depart' && currentStop && <button className="button admin-primary-action" disabled={pending !== null} onClick={() => runCommand({ type: 'depart', stopIndex: currentStop.position }, 'Departure')}>{pending === 'Departure' ? 'SAVING…' : 'MARK DEPARTED'}</button>}
+        {!nextAction && <div className="admin-complete">No further stop action required.</div>}
+        {(state.previous || state.next) && <div className="admin-neighbors">
+          {state.previous && <span><small>PREVIOUS</small><strong>{state.previous.name}</strong></span>}
+          {state.next && <span><small>NEXT</small><strong>{state.next.name}</strong></span>}
+        </div>}
+      </section>
       {notice && <div className={isConflict ? 'admin-notice is-conflict' : 'admin-notice'} role="status">{notice}{isConflict && <span> Live data will refresh automatically; verify the current stop before retrying.</span>}</div>}
-      <section className="hero hero--compact">
-        <span className="section-label">CURRENT OPERATING STATE</span>
-        <h1>{state.phase.replace('_', ' ')}</h1>
-        <p>{state.current?.name ?? 'No current stop'} · feed {state.freshness}</p>
-      </section>
 
-      <section className="admin-card">
-        <div className="section-label">PREVIOUS / CURRENT / NEXT</div>
-        {nearby.map((stop) => <div className={stop.id === state.current?.id ? 'admin-stop is-current' : 'admin-stop'} key={stop.id}>
-          <span><small>{stop.id === state.current?.id ? 'CURRENT' : stop.position === state.previous?.position ? 'PREVIOUS' : 'NEXT'}</small><strong>{stop.name}</strong></span>
-          {stop.id === state.current?.id && <div className="admin-actions">
-            <button className="button" disabled={pending !== null || stop.status !== 'pending'} onClick={() => runCommand({ type: 'arrive', stopIndex: stop.position }, 'Arrival')}>{pending === 'Arrival' ? 'Saving…' : 'Arrived'}</button>
-            <button className="button" disabled={pending !== null || stop.status !== 'active'} onClick={() => runCommand({ type: 'depart', stopIndex: stop.position }, 'Departure')}>{pending === 'Departure' ? 'Saving…' : 'Departed'}</button>
-          </div>}
-        </div>)}
-      </section>
-
-      <section className="admin-card">
-        <div className="section-label">SHARE CURRENT SERVICE UPDATE</div>
-        <p className="share-preview">{shareContent.text}</p>
-        <button className="button" disabled={pending !== null} onClick={shareServiceUpdate}>Share service update</button>
+      <section className="admin-quick-share">
+        <button className="button button--secondary" disabled={pending !== null} onClick={shareServiceUpdate}>Share current update</button>
         {shareStatus && <p className="share-status" aria-live="polite">{shareStatus}</p>}
         {manualShareText && <textarea className="manual-share" readOnly aria-label="Service update to copy" value={manualShareText} onFocus={(input) => input.currentTarget.select()} />}
       </section>
 
-      <section className="admin-card">
-        <label className="section-label" htmlFor="message">TEMPORARY SERVICE MESSAGE</label>
-        <textarea id="message" maxLength={100} value={message} onChange={(input) => setMessage(input.target.value)} />
-        <div className="admin-actions">
-          <button className="button" disabled={pending !== null} onClick={() => runCommand({ type: 'message', message }, 'Message')}>Post message</button>
-          <button className="button button--secondary" disabled={pending !== null || !event.customMessage} onClick={() => runCommand({ type: 'message', message: '' }, 'Message')}>Clear</button>
-        </div>
-      </section>
-
-      <section className="admin-card">
-        <label className="section-label" htmlFor="eta-adjustment">OPTIONAL ETA ADJUSTMENT</label>
-        <select id="eta-adjustment" value={etaMinutes} disabled={pending !== null} onChange={(input) => setEtaMinutes(input.target.value)}>
-          <option value="-10">10 min earlier</option><option value="-5">5 min earlier</option><option value="0">No adjustment</option><option value="5">5 min later</option><option value="10">10 min later</option>
-        </select>
-        <button className="button" disabled={pending !== null} onClick={() => runCommand({ type: 'adjust_eta', minutes: Number(etaMinutes) }, 'ETA adjustment')}>Save ETA adjustment</button>
-      </section>
-
-      <section className="admin-card disabled-controls" aria-label="Unavailable destructive controls">
-        <div className="section-label">RECOVERY CONTROLS</div>
-        <p>Undo and reset are disabled. Safe revision-aware implementations are not included in this release; correct an accidental update with the available forward actions.</p>
-        <div className="admin-actions"><button className="button button--secondary" disabled>Undo unavailable</button><button className="button button--danger" disabled>Reset unavailable</button></div>
-      </section>
+      <details className="admin-tools">
+        <summary>More controls</summary>
+        <section className="admin-card">
+          <label className="section-label" htmlFor="message">TEMPORARY SERVICE MESSAGE</label>
+          <textarea id="message" maxLength={100} value={message} onChange={(input) => setMessage(input.target.value)} />
+          <div className="admin-actions">
+            <button className="button" disabled={pending !== null} onClick={() => runCommand({ type: 'message', message }, 'Message')}>Post message</button>
+            <button className="button button--secondary" disabled={pending !== null || !event.customMessage} onClick={() => runCommand({ type: 'message', message: '' }, 'Message')}>Clear</button>
+          </div>
+        </section>
+        <section className="admin-card">
+          <label className="section-label" htmlFor="eta-adjustment">OPTIONAL ETA ADJUSTMENT</label>
+          <select id="eta-adjustment" value={etaMinutes} disabled={pending !== null} onChange={(input) => setEtaMinutes(input.target.value)}>
+            <option value="-10">10 min earlier</option><option value="-5">5 min earlier</option><option value="0">No adjustment</option><option value="5">5 min later</option><option value="10">10 min later</option>
+          </select>
+          <button className="button" disabled={pending !== null} onClick={() => runCommand({ type: 'adjust_eta', minutes: Number(etaMinutes) }, 'ETA adjustment')}>Save ETA adjustment</button>
+        </section>
+      </details>
+      <div className="admin-footer"><a href="/">View public tracker</a><button className="text-button" onClick={logout} disabled={pending !== null}>Sign out</button></div>
     </main>
   </div>;
 }
