@@ -59,10 +59,10 @@ export default function ArchiveApp() {
       </section>
 
       <section className="archive-stats" aria-label="Activity statistics">
-        <div><strong>10.0</strong><span>miles</span></div>
+        <div><strong>10.1</strong><span>miles</span></div>
         <div><strong>1,464</strong><span>feet climbed</span></div>
-        <div><strong>5:09</strong><span>activity time</span></div>
-        <div><strong>10</strong><span>beers</span></div>
+        <div><strong>9:33<small>/mi</small></strong><span>average pace</span></div>
+        <div><strong>24<small>min</small></strong><span>average stop</span></div>
       </section>
 
       <section className="archive-intro" id="photos">
