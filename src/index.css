@@ -35,6 +35,7 @@ h1, h2, h3 { font-family: 'Newsreader', Georgia, serif; }
 .archive-stats div { min-height: 112px; padding: 19px 17px; border-right: 1px solid rgba(235,228,193,.25); border-bottom: 1px solid rgba(235,228,193,.25); }
 .archive-stats strong, .archive-stats span { display: block; }
 .archive-stats strong { font: 700 clamp(2rem, 10vw, 3.4rem)/.9 'Newsreader', Georgia, serif; letter-spacing: -.05em; }
+.archive-stats strong small { margin-left: 4px; font: 500 .32em/1 'DM Mono', monospace; letter-spacing: 0; }
 .archive-stats span { margin-top: 8px; color: var(--sail); font-size: .64rem; text-transform: uppercase; letter-spacing: .09em; }
 .archive-intro { max-width: 860px; padding: 38px 18px 24px; }
 .archive-intro > p:last-child { margin: 0; color: #514c43; font-family: 'Newsreader', Georgia, serif; font-size: 1.15rem; line-height: 1.4; }
