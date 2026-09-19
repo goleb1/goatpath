@@ -54,8 +54,8 @@ export default function ArchiveApp() {
 
     <main>
       <section className="archive-date">
-        <p>9TH ANNUAL LE TOUR DE SOUTH HILLBILLIES</p>
-        <h1>September 18, 2026</h1>
+        <h1>9th Annual<br />Le Tour de South Hillbillies</h1>
+        <p>FRIDAY · SEPTEMBER 18, 2026</p>
       </section>
 
       <section className="archive-stats" aria-label="Activity statistics">
