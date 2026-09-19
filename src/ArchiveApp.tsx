@@ -49,32 +49,25 @@ export default function ArchiveApp() {
   return <div className="archive-shell">
     <header className="archive-header">
       <img src="/SHBACExpress.png" alt="SHBAC Express" />
-      <span>THE 2026 ROLL</span>
       <img src="/goat4.png" alt="" />
     </header>
 
     <main>
-      <section className="archive-hero">
-        <div className="archive-hero__photo" aria-hidden="true" />
-        <div className="archive-hero__copy">
-          <p className="eyebrow">SEPTEMBER 18, 2026 · PITTSBURGH</p>
-          <h1>The night<br />in ten stops.</h1>
-          <p className="archive-hero__dek">The 9th Annual Le Tour de South Hillbillies. Ten houses, ten beers, and one increasingly ambitious group photo at every stop.</p>
-          <a className="archive-button archive-button--primary" href="#photos">Ride the line</a>
-        </div>
+      <section className="archive-date">
+        <p>9TH ANNUAL LE TOUR DE SOUTH HILLBILLIES</p>
+        <h1>September 18, 2026</h1>
       </section>
 
       <section className="archive-stats" aria-label="Activity statistics">
         <div><strong>10.0</strong><span>miles</span></div>
         <div><strong>1,464</strong><span>feet climbed</span></div>
         <div><strong>5:09</strong><span>activity time</span></div>
-        <div><strong>10</strong><span>group photos</span></div>
+        <div><strong>10</strong><span>beers</span></div>
       </section>
 
       <section className="archive-intro" id="photos">
         <p className="eyebrow">ALL ABOARD</p>
-        <h2>Every station.<br />Every questionable pose.</h2>
-        <p>Tap any photograph to see it full-screen, or grab the metadata-free full-resolution file. The exact route and home addresses have retired for the year.</p>
+        <p>Tap any photo to view it full-screen.</p>
       </section>
 
       <ol className="photo-line">
@@ -94,17 +87,13 @@ export default function ArchiveApp() {
       </ol>
 
       <section className="archive-download">
-        <img src="/goat2.png" alt="" />
-        <p className="eyebrow">TAKE THE WHOLE ROLL</p>
-        <h2>All ten. One download.</h2>
-        <p>Full-resolution, location metadata removed, and ready to keep.</p>
+        <p>Download all photos in a single file.</p>
         <a className="archive-button archive-button--primary" href="/2026/le-tour-2026-photos.zip" download>Download all photos · 20 MB</a>
       </section>
     </main>
 
     <footer>
       <strong>9TH ANNUAL LE TOUR DE SOUTH HILLBILLIES</strong>
-      <span>GOATPATH · SERVICE COMPLETE</span>
     </footer>
 
     <dialog ref={dialogRef} className="lightbox" onClose={() => setActive(null)} onClick={(event) => { if (event.target === dialogRef.current) close(); }}>
